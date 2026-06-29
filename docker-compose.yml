@@ -53,7 +53,7 @@ services:
       - "--retentionPeriod=90d"
       # Garde 90 jours de métriques
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8428/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8428/health"]
       interval: 15s
       timeout: 5s
       retries: 5

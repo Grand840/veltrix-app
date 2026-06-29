@@ -1,19 +1,25 @@
 """
 Veltrix API — Point d'entrée principal
+Version Jour 02 : connexion base de données intégrée
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+
+from app.config import settings
+from app.database import get_db, engine, Base
 
 # Création de l'application FastAPI
 app = FastAPI(
-    title="Veltrix API",
+    title=settings.app_name,
     description="Infrastructure Monitoring SaaS — Backend API",
-    version="0.1.0",
-    docs_url="/docs",        # Swagger UI accessible à /docs
-    redoc_url="/redoc",      # ReDoc accessible à /redoc
+    version=settings.app_version,
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
-# CORS : autorise le frontend (localhost:3000) à appeler l'API
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -24,22 +30,34 @@ app.add_middleware(
 
 
 @app.get("/health", tags=["System"])
-async def health_check():
+async def health_check(db: Session = Depends(get_db)):
     """
-    Vérifie que l'API est en ligne.
-    Utilisé par Docker healthcheck et les load balancers.
+    Vérifie que l'API ET la base de données sont en ligne.
+    Retourne le statut de chaque composant séparément.
     """
+    # Test connexion PostgreSQL
+    try:
+        db.execute(text("SELECT 1"))
+        db_status = "ok"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+
     return {
-        "status": "ok",
+        "status": "ok" if db_status == "ok" else "degraded",
         "service": "veltrix-api",
-        "version": "0.1.0"
+        "version": settings.app_version,
+        "environment": settings.app_env,
+        "components": {
+            "api": "ok",
+            "database": db_status,
+        }
     }
 
 
 @app.get("/", tags=["System"])
 async def root():
-    """Point d'entrée racine."""
     return {
         "message": "Veltrix API is running",
-        "docs": "/docs"
+        "docs": "/docs",
+        "version": settings.app_version,
     }
