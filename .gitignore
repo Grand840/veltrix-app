@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+*.egg
+.pytest_cache/
+
+# Go
+/agent/veltrix-agent
+*.exe
+*.test
+
+# Node
+node_modules/
+.next/
+out/
+*.log
+
+# Environnement (CRITIQUE : ne jamais committer les secrets)
+.env
+.env.local
+.env.production
+!.env.example
+
+# Docker
+.docker/
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log

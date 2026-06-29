@@ -1,0 +1,91 @@
+# docker-compose.yml — Stack de développement Veltrix
+# Version : Compose V2 (pas de version: en en-tête, obsolète)
+
+services:
+
+  # Base de données principale
+  postgres:
+    image: postgres:16-alpine
+    # alpine = image légère (50MB vs 400MB pour la version complète)
+    container_name: veltrix_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-veltrix}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-veltrix_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-veltrix_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Volume nommé = données persistent entre redémarrages
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-veltrix}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Cache et sessions
+  redis:
+    image: redis:7-alpine
+    container_name: veltrix_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Base de données de métriques (monitoring)
+  victoria-metrics:
+    image: victoriametrics/victoria-metrics:latest
+    container_name: veltrix_victoria
+    restart: unless-stopped
+    ports:
+      - "8428:8428"
+    volumes:
+      - victoria_data:/storage
+    command:
+      - "--storageDataPath=/storage"
+      - "--retentionPeriod=90d"
+      # Garde 90 jours de métriques
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8428/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # API Backend
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: veltrix_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_URL: redis://redis:6379
+      VICTORIA_METRICS_URL: http://victoria-metrics:8428
+    volumes:
+      - ./backend:/app
+      # Monte le code source = hot-reload en dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      victoria-metrics:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  victoria_data:
+  # Volumes nommés gérés par Docker = persistent et propre
