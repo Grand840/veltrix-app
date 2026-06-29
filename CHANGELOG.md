@@ -19,3 +19,20 @@
 
 ### Tests
 - ✅ 10/10 tests Jour 01 passés
+
+## [0.0.2] - Jour 02 - Database Models & Migrations
+
+### Ajouté
+- Modèles SQLAlchemy : Organization, User, Agent, Alert
+- BaseModel abstrait avec UUID, created_at, updated_at
+- Configuration Alembic + migration initiale appliquée
+- Endpoint /health vérifie PostgreSQL en temps réel
+- docs/DATABASE.md : schéma complet documenté
+
+### Décisions techniques
+- UUID comme clé primaire (pas d'auto-increment)
+- Séparation PostgreSQL (données) / VictoriaMetrics (métriques)
+- Alembic pour versionner les changements de schéma
+
+### Tests
+- ✅ 11/11 tests Jour 02 passés
