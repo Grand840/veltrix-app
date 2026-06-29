@@ -38,7 +38,7 @@ class Organization(BaseModel):
     )
 
     plan = Column(
-        Enum(PlanType),
+        Enum(PlanType, values_callable=lambda x: [e.value for e in x]),
         default=PlanType.FREE,
         nullable=False,
         comment="Plan d'abonnement actuel"

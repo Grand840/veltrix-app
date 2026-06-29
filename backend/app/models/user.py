@@ -50,7 +50,7 @@ class User(BaseModel):
     )
 
     role = Column(
-        Enum(UserRole),
+        Enum(UserRole, values_callable=lambda x: [e.value for e in x]),
         default=UserRole.MEMBER,
         nullable=False,
         comment="Rôle dans l'organisation"

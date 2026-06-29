@@ -1,8 +1,8 @@
 """initial_schema
 
-Revision ID: 77b6ea67e403
+Revision ID: eced1bb69736
 Revises: 
-Create Date: 2026-06-29 13:51:08.077643
+Create Date: 2026-06-29 21:54:22.591143
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '77b6ea67e403'
+revision: str = 'eced1bb69736'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -23,7 +23,7 @@ def upgrade() -> None:
     op.create_table('organizations',
     sa.Column('name', sa.String(length=255), nullable=False, comment="Nom de l'organisation"),
     sa.Column('slug', sa.String(length=100), nullable=False, comment='Identifiant URL-friendly (ex: acme-corp)'),
-    sa.Column('plan', sa.Enum('FREE', 'STARTER', 'PRO', 'ENTERPRISE', name='plantype'), nullable=False, comment="Plan d'abonnement actuel"),
+    sa.Column('plan', sa.Enum('free', 'starter', 'pro', 'enterprise', name='plantype'), nullable=False, comment="Plan d'abonnement actuel"),
     sa.Column('max_agents', sa.Integer(), nullable=False, comment="Nombre maximum d'agents autorisés"),
     sa.Column('is_active', sa.Boolean(), nullable=False, comment='Organisation active ou suspendue'),
     sa.Column('id', sa.UUID(), nullable=False, comment='Identifiant unique universel'),
@@ -36,7 +36,7 @@ def upgrade() -> None:
     sa.Column('name', sa.String(length=255), nullable=False, comment='Nom lisible (ex: prod-server-01, db-master)'),
     sa.Column('hostname', sa.String(length=255), nullable=True, comment="Hostname détecté automatiquement par l'agent"),
     sa.Column('api_key', sa.String(length=64), nullable=False, comment="Clé secrète utilisée par l'agent pour s'authentifier"),
-    sa.Column('status', sa.Enum('ONLINE', 'OFFLINE', 'PENDING', 'DISABLED', name='agentstatus'), nullable=False, comment='Statut de connexion actuel'),
+    sa.Column('status', sa.Enum('online', 'offline', 'pending', 'disabled', name='agentstatus'), nullable=False, comment='Statut de connexion actuel'),
     sa.Column('os_info', sa.String(length=255), nullable=True, comment='OS détecté (ex: Ubuntu 22.04 LTS)'),
     sa.Column('ip_address', sa.String(length=45), nullable=True, comment="Dernière adresse IP connue de l'agent"),
     sa.Column('last_seen_at', sa.DateTime(), nullable=True, comment="Dernière fois que l'agent a envoyé des métriques"),
@@ -57,7 +57,7 @@ def upgrade() -> None:
     sa.Column('hashed_password', sa.String(length=255), nullable=False, comment='Hash bcrypt du mot de passe — JAMAIS le mot de passe clair'),
     sa.Column('full_name', sa.String(length=255), nullable=True, comment="Nom complet affiché dans l'interface"),
     sa.Column('phone', sa.String(length=20), nullable=True, comment='Numéro pour alertes SMS (format international: +228...)'),
-    sa.Column('role', sa.Enum('OWNER', 'ADMIN', 'MEMBER', name='userrole'), nullable=False, comment="Rôle dans l'organisation"),
+    sa.Column('role', sa.Enum('owner', 'admin', 'member', name='userrole'), nullable=False, comment="Rôle dans l'organisation"),
     sa.Column('is_active', sa.Boolean(), nullable=False, comment='Compte actif ou désactivé'),
     sa.Column('is_verified', sa.Boolean(), nullable=False, comment='Email vérifié via le lien de confirmation'),
     sa.Column('organization_id', sa.UUID(), nullable=False, comment='Organisation à laquelle appartient cet utilisateur'),
@@ -72,9 +72,9 @@ def upgrade() -> None:
     op.create_table('alerts',
     sa.Column('title', sa.String(length=255), nullable=False, comment='Titre court (ex: CPU critique sur prod-server-01)'),
     sa.Column('message', sa.Text(), nullable=True, comment="Description détaillée de l'alerte"),
-    sa.Column('metric', sa.Enum('CPU_USAGE', 'MEMORY_USAGE', 'DISK_USAGE', 'AGENT_DOWN', 'NETWORK_LATENCY', name='alertmetric'), nullable=False, comment="Quelle métrique a déclenché l'alerte"),
-    sa.Column('severity', sa.Enum('INFO', 'WARNING', 'CRITICAL', name='alertseverity'), nullable=False, comment='Niveau de gravité'),
-    sa.Column('status', sa.Enum('FIRING', 'ACKNOWLEDGED', 'RESOLVED', name='alertstatus'), nullable=False, comment="Statut actuel de l'alerte"),
+    sa.Column('metric', sa.Enum('cpu_usage', 'memory_usage', 'disk_usage', 'agent_down', 'network_latency', name='alertmetric'), nullable=False, comment="Quelle métrique a déclenché l'alerte"),
+    sa.Column('severity', sa.Enum('info', 'warning', 'critical', name='alertseverity'), nullable=False, comment='Niveau de gravité'),
+    sa.Column('status', sa.Enum('firing', 'acknowledged', 'resolved', name='alertstatus'), nullable=False, comment="Statut actuel de l'alerte"),
     sa.Column('threshold_value', sa.Float(), nullable=True, comment="Seuil configuré qui a déclenché l'alerte (ex: 80.0 pour 80%)"),
     sa.Column('current_value', sa.Float(), nullable=True, comment='Valeur mesurée au moment du déclenchement (ex: 94.5)'),
     sa.Column('fired_at', sa.DateTime(), nullable=True, comment='Moment exact du déclenchement'),
@@ -95,7 +95,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_alerts_agent_id'), 'alerts', ['agent_id'], unique=False)
     op.create_index(op.f('ix_alerts_severity'), 'alerts', ['severity'], unique=False)
     op.create_index(op.f('ix_alerts_status'), 'alerts', ['status'], unique=False)
-    # ### end Alembic commands ###
+# ### end Alembic commands ###
 
 
 def downgrade() -> None:
@@ -113,4 +113,10 @@ def downgrade() -> None:
     op.drop_table('agents')
     op.drop_index(op.f('ix_organizations_slug'), table_name='organizations')
     op.drop_table('organizations')
+    op.execute("DROP TYPE IF EXISTS plantype CASCADE")
+    op.execute("DROP TYPE IF EXISTS agentstatus CASCADE")
+    op.execute("DROP TYPE IF EXISTS userrole CASCADE")
+    op.execute("DROP TYPE IF EXISTS alertmetric CASCADE")
+    op.execute("DROP TYPE IF EXISTS alertseverity CASCADE")
+    op.execute("DROP TYPE IF EXISTS alertstatus CASCADE")
     # ### end Alembic commands ###

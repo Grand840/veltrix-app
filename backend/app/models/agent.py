@@ -46,7 +46,7 @@ class Agent(BaseModel):
     )
 
     status = Column(
-        Enum(AgentStatus),
+        Enum(AgentStatus, values_callable=lambda x: [e.value for e in x]),
         default=AgentStatus.PENDING,
         nullable=False,
         index=True,

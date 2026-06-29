@@ -52,13 +52,13 @@ class Alert(BaseModel):
     )
 
     metric = Column(
-        Enum(AlertMetric),
+        Enum(AlertMetric, values_callable=lambda x: [e.value for e in x]),
         nullable=False,
         comment="Quelle métrique a déclenché l'alerte"
     )
 
     severity = Column(
-        Enum(AlertSeverity),
+        Enum(AlertSeverity, values_callable=lambda x: [e.value for e in x]),
         default=AlertSeverity.WARNING,
         nullable=False,
         index=True,
@@ -66,7 +66,7 @@ class Alert(BaseModel):
     )
 
     status = Column(
-        Enum(AlertStatus),
+        Enum(AlertStatus, values_callable=lambda x: [e.value for e in x]),
         default=AlertStatus.FIRING,
         nullable=False,
         index=True,
