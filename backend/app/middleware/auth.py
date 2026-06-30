@@ -1,13 +1,16 @@
+from typing import Optional
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, APIKeyHeader
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.user import User
 from app.models.organization import Organization
+from app.models.agent import Agent
 from app.services.auth import decode_access_token
 
 bearer_scheme = HTTPBearer()
+agent_key_header = APIKeyHeader(name="X-Agent-Key", auto_error=False)
 
 
 def get_current_user(
@@ -48,3 +51,25 @@ def get_current_org(
             detail="Organisation introuvable ou suspendue"
         )
     return org
+
+
+def get_current_agent(
+    api_key: Optional[str] = Depends(agent_key_header),
+    db: Session = Depends(get_db),
+) -> Agent:
+    if not api_key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Cle API manquante. Header requis : X-Agent-Key",
+        )
+
+    from app.services.agents import get_agent_by_api_key
+    agent = get_agent_by_api_key(api_key, db)
+
+    if not agent:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Cle API invalide ou agent desactive",
+        )
+
+    return agent

@@ -6,10 +6,11 @@ from sqlalchemy import text
 from app.config import settings
 from app.database import get_db
 from app.routers import auth as auth_router
+from app.routers import agents as agents_router
 
 app = FastAPI(
     title=settings.app_name,
-    description="## Veltrix - Infrastructure Monitoring SaaS\n\n### Authentification\nTous les endpoints (sauf /health, /auth/register, /auth/login)\nnecessitent un JWT dans le header :\n```\nAuthorization: Bearer <votre_token>\n```",
+    description="## Veltrix - Infrastructure Monitoring SaaS\n\n### Authentification\nEndpoints proteges : header `Authorization: Bearer <token>`\nEndpoints agent Go : header `X-Agent-Key: vltx_<cle>`",
     version=settings.app_version,
     docs_url="/docs",
     redoc_url="/redoc",
@@ -23,10 +24,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(
-    auth_router.router,
-    prefix=settings.api_prefix
-)
+app.include_router(auth_router.router, prefix=settings.api_prefix)
+app.include_router(agents_router.router, prefix=settings.api_prefix)
 
 
 @app.get("/health", tags=["System"])
@@ -42,17 +41,10 @@ async def health_check(db: Session = Depends(get_db)):
         "service": "veltrix-api",
         "version": settings.app_version,
         "environment": settings.app_env,
-        "components": {
-            "api": "ok",
-            "database": db_status,
-        }
+        "components": {"api": "ok", "database": db_status},
     }
 
 
 @app.get("/", tags=["System"])
 async def root():
-    return {
-        "message": "Veltrix API is running",
-        "docs": "/docs",
-        "version": settings.app_version,
-    }
+    return {"message": "Veltrix API is running", "docs": "/docs"}

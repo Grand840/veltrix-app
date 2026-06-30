@@ -59,3 +59,21 @@
 
 ### Tests
 - 12/12 tests Jour 03 passes
+
+## [0.0.4] - Jour 04 - Agents CRUD
+
+### Ajoute
+- Schemas Pydantic : AgentCreateRequest, AgentUpdateRequest, AgentResponse, AgentListResponse, AgentInstallCommand
+- Service agents : create_agent (avec verif limite plan), get_agents, get_agent_by_id, update_agent, delete_agent (soft), update_agent_heartbeat, generate_api_key
+- Dependance get_current_agent : auth par cle API (header X-Agent-Key) pour l agent Go
+- Router /api/v1/agents : POST, GET, GET/{id}, PATCH/{id}, DELETE/{id}
+- Fichier tests/http/agents.http : 11 cas de test
+
+### Securite
+- Multi-tenancy : chaque org ne voit que ses propres agents
+- api_key retournee UNE SEULE FOIS (a la creation) - null ensuite
+- Soft delete : is_active=False, donnees historiques preservees
+- Limite d agents verifiee selon le plan (free=3)
+
+### Tests
+- 13/13 tests Jour 04 passes

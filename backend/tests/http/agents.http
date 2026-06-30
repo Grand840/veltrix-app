@@ -1,0 +1,22 @@
+### =============================================
+### Veltrix API - Tests Agents
+### =============================================
+
+@base_url = http://localhost:8000/api/v1
+@token = REMPLACER_PAR_TON_TOKEN
+
+### 1. Lister les agents (vide au debut)
+GET {{base_url}}/agents
+Authorization: Bearer {{token}}
+
+###
+
+### 2. Creer un agent
+POST {{base_url}}/agents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "prod-server-01",
+  "description": "Serveur de production principal"
+}
