@@ -1,25 +1,20 @@
-"""
-Veltrix API — Point d'entrée principal
-Version Jour 02 : connexion base de données intégrée
-"""
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
 from app.config import settings
-from app.database import get_db, engine, Base
+from app.database import get_db
+from app.routers import auth as auth_router
 
-# Création de l'application FastAPI
 app = FastAPI(
     title=settings.app_name,
-    description="Infrastructure Monitoring SaaS — Backend API",
+    description="## Veltrix - Infrastructure Monitoring SaaS\n\n### Authentification\nTous les endpoints (sauf /health, /auth/register, /auth/login)\nnecessitent un JWT dans le header :\n```\nAuthorization: Bearer <votre_token>\n```",
     version=settings.app_version,
     docs_url="/docs",
     redoc_url="/redoc",
 )
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -28,14 +23,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(
+    auth_router.router,
+    prefix=settings.api_prefix
+)
+
 
 @app.get("/health", tags=["System"])
 async def health_check(db: Session = Depends(get_db)):
-    """
-    Vérifie que l'API ET la base de données sont en ligne.
-    Retourne le statut de chaque composant séparément.
-    """
-    # Test connexion PostgreSQL
     try:
         db.execute(text("SELECT 1"))
         db_status = "ok"

@@ -36,3 +36,26 @@
 
 ### Tests
 - ✅ 11/11 tests Jour 02 passés
+
+## [0.0.3] - Jour 03 - Authentication System
+
+### Ajoute
+- Schemas Pydantic : RegisterRequest, LoginRequest, TokenResponse, UserResponse
+- Service auth : hash_password (bcrypt), verify_password, create/decode JWT
+- register_user : cree Organization + User (OWNER) en transaction atomique
+- login_user : verification securisee avec message d erreur generique
+- Dependance get_current_user : protege les endpoints avec Depends()
+- Endpoints : POST /auth/register, POST /auth/login, GET /auth/me, POST /auth/logout
+- Fichier de tests REST Client : tests/http/auth.http
+
+### Securite
+- Bcrypt pour le hachage (irreversible)
+- JWT HS256 signe avec SECRET_KEY
+- Erreur generique login (anti-enumeration des comptes)
+- hashed_password jamais expose dans les reponses API
+
+### Correctifs
+- bcrypt==4.0.1 ajoute aux requirements (compatibilite passlib)
+
+### Tests
+- 12/12 tests Jour 03 passes

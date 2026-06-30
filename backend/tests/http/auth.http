@@ -1,0 +1,89 @@
+### =============================================
+### Veltrix API - Tests d authentification
+### =============================================
+
+@base_url = http://localhost:8000/api/v1
+@token = REMPLACER_PAR_LE_TOKEN_RECU
+
+### 1. Health check
+GET http://localhost:8000/health
+
+###
+
+### 2. Creer un compte (Register)
+POST {{base_url}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "admin@veltrix-test.com",
+  "password": "VeltrixPass1",
+  "full_name": "Admin Veltrix",
+  "organization_name": "Veltrix Demo Org",
+  "phone": "+22890000000"
+}
+
+###
+
+### 3. Se connecter (Login)
+POST {{base_url}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@veltrix-test.com",
+  "password": "VeltrixPass1"
+}
+
+###
+
+### 4. Mon profil (endpoint protege)
+GET {{base_url}}/auth/me
+Authorization: Bearer {{token}}
+
+###
+
+### 5. Logout
+POST {{base_url}}/auth/logout
+Authorization: Bearer {{token}}
+
+###
+
+### 6. Test erreur - email deja utilise
+POST {{base_url}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "admin@veltrix-test.com",
+  "password": "AnotherPass1",
+  "full_name": "Doublon",
+  "organization_name": "Doublon Org"
+}
+
+###
+
+### 7. Test erreur - mauvais mot de passe
+POST {{base_url}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@veltrix-test.com",
+  "password": "mauvaismdp"
+}
+
+###
+
+### 8. Test erreur - token invalide
+GET {{base_url}}/auth/me
+Authorization: Bearer token_invalide_ici
+
+###
+
+### 9. Test erreur - mot de passe trop court
+POST {{base_url}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "test2@test.com",
+  "password": "court",
+  "full_name": "Test",
+  "organization_name": "Test Org"
+}
