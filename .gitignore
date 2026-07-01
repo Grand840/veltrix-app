@@ -45,3 +45,4 @@ logs/
 agent/veltrix-agent
 agent/veltrix-agent-*
 /tmp/veltrix-buffer/
+*.db
