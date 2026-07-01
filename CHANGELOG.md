@@ -121,3 +121,30 @@
 
 ### Tests
 - 10/10 tests Jour 06 passes
+
+## [0.0.7] - Jour 07 - Review & Consolidation Semaine 0
+
+### Tests automatises ajoutes
+- `tests/conftest.py` : fixtures partagees (client SQLite, registered_user, auth_headers, created_agent)
+- `tests/test_system.py` : health check, OpenAPI schema, securite globale (8 tests)
+- `tests/test_auth.py` : register (7), login (4), /me (4) = 15 tests auth
+- `tests/test_agents.py` : create (5), list (3), get (3), update (2), delete (1) = 14 tests agents
+- `pytest.ini` : configuration asyncio + chemins de test
+
+### Documentation complete
+- `docs/ARCHITECTURE.md` : schema ASCII complet, flux de donnees, ADR 001-005
+- `docs/AGENT.md` : guide dinstallation complet (mis a jour)
+
+### Validation
+- Test bout-en-bout pipeline complet : agent -> API -> VictoriaMetrics -> query
+- 37/37 tests pytest verts (SQLite, isolation totale)
+- Agent Go confirme : envoi CPU/RAM/Disk fonctionnel
+
+### Bilan Semaine 0 - Fondations completes
+- Jour 01 : Setup environnement (Python 3.12, Go 1.22, Docker, Node 20)
+- Jour 02 : Modeles BDD (Organization, User, Agent, Alert) + migrations Alembic
+- Jour 03 : Auth JWT + bcrypt (register, login, /me, get_current_user)
+- Jour 04 : Agents CRUD + cle API vltx_ + multi-tenancy
+- Jour 05 : Metriques -> VictoriaMetrics (ingest, summary, history, overview)
+- Jour 06 : Agent Go v0.1 (collecte CPU/RAM/Disk/Network + store-and-forward)
+- Jour 07 : Tests pytest automatises + documentation + pipeline bout-en-bout
