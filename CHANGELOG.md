@@ -98,3 +98,26 @@
 - History via JWT : OK (points temporels avec timestamps)
 - Overview via JWT : OK (tous les agents de l'org)
 
+
+## [0.0.6] - Jour 06 - Agent Go v0.1
+
+### Ajoute
+- `agent/config.go` : config depuis variables d'environnement (VELTRIX_KEY, VELTRIX_URL, VELTRIX_INTERVAL)
+- `agent/collector/cpu.go` : collecte CPU via gopsutil (cpu.Percent)
+- `agent/collector/memory.go` : collecte RAM via gopsutil (mem.VirtualMemory)
+- `agent/collector/disk.go` : collecte disque "/" via gopsutil (disk.Usage)
+- `agent/collector/network.go` : stats reseau agregees via gopsutil (net.IOCounters)
+- `agent/collector/collector.go` : agregateur central, degradation gracieuse par metrique
+- `agent/sender/buffer.go` : store-and-forward sur disque (fichiers JSON horodates, FIFO, limite 2000)
+- `agent/sender/http.go` : envoi HTTP avec flush buffer automatique avant chaque cycle
+- `agent/main.go` : boucle principale, ticker configurable, arret propre SIGTERM/SIGINT
+- `docs/AGENT.md` : guide complet d'installation et de configuration
+
+### Technique
+- Binaire statique Go (~7.4MB), zero dependance externe a l'execution
+- gopsutil v3.24.5 pour la collecte cross-platform
+- Store-and-forward : ~16h de buffer a 30s d'intervalle
+- Arret propre sur SIGTERM (compatible systemd et Docker)
+
+### Tests
+- 10/10 tests Jour 06 passes

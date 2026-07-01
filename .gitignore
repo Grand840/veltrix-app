@@ -42,3 +42,6 @@ Thumbs.db
 # Logs
 logs/
 *.log
+agent/veltrix-agent
+agent/veltrix-agent-*
+/tmp/veltrix-buffer/
