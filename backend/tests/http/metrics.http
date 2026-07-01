@@ -1,0 +1,28 @@
+### =============================================
+### Veltrix API - Tests Metriques
+### =============================================
+
+@base_url = http://localhost:8000/api/v1
+@token     = REMPLACER_PAR_TON_TOKEN_JWT
+@agent_key = REMPLACER_PAR_LA_CLE_AGENT_vltx_xxx
+@agent_id  = REMPLACER_PAR_L_UUID_DE_L_AGENT
+
+### 1. Ingest metriques normales
+POST {{base_url}}/metrics/ingest
+X-Agent-Key: {{agent_key}}
+Content-Type: application/json
+
+{
+  "hostname": "prod-server-01",
+  "os_info": "Ubuntu 22.04 LTS",
+  "ip_address": "192.168.1.10",
+  "cpu_usage_percent": 45.2,
+  "memory_usage_percent": 67.8,
+  "memory_used_mb": 2774,
+  "memory_total_mb": 4096,
+  "disk_usage_percent": 23.1,
+  "disk_used_gb": 46.2,
+  "disk_total_gb": 200.0,
+  "network_bytes_sent": 1024000,
+  "network_bytes_recv": 2048000
+}

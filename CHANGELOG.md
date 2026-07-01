@@ -77,3 +77,24 @@
 
 ### Tests
 - 13/13 tests Jour 04 passes
+## [0.0.5] - Jour 05 - Metrics Pipeline
+
+### Ajoute
+- Schemas Pydantic : MetricPayload, MetricPoint, MetricSeries, AgentMetricsSummary, MetricsReceiveResponse
+- formats/schemas/metrics.py : validation des payloads agents, query responses
+- services/metrics.py : ecriture en format Prometheus vers VictoriaMetrics, queries instant/range, calcul de sante
+- routers/metrics.py : POST /metrics/ingest, GET /agents/{id}/summary, GET /agents/{id}/history/{metric}, GET /metrics/overview
+- Fichier de tests REST Client : tests/http/metrics.http
+
+### Decisions techniques
+- Format Prometheus exposition pour VictoriaMetrics : compatible Grafana futur
+- Labels appliquees a chaque metrique : agent_id, org_id, hostname
+- Indisponibilite VictoriaMetrics ne plante pas l'API (retour success=false)
+- 9 metriques standard : cpu, memory (usage/used/total), disk (usage/used/total), network (sent/recv)
+
+### Tests
+- Ingest via X-Agent-Key : OK
+- Summary via JWT : OK (donnees live depuis VM)
+- History via JWT : OK (points temporels avec timestamps)
+- Overview via JWT : OK (tous les agents de l'org)
+

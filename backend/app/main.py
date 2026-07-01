@@ -7,10 +7,11 @@ from app.config import settings
 from app.database import get_db
 from app.routers import auth as auth_router
 from app.routers import agents as agents_router
+from app.routers import metrics as metrics_router
 
 app = FastAPI(
     title=settings.app_name,
-    description="## Veltrix - Infrastructure Monitoring SaaS\n\n### Authentification\nEndpoints proteges : header `Authorization: Bearer <token>`\nEndpoints agent Go : header `X-Agent-Key: vltx_<cle>`",
+    description="## Veltrix - Infrastructure Monitoring SaaS\n\n### Auth utilisateur\nHeader : `Authorization: Bearer <jwt_token>`\n\n### Auth agent Go\nHeader : `X-Agent-Key: vltx_<api_key>`",
     version=settings.app_version,
     docs_url="/docs",
     redoc_url="/redoc",
@@ -26,6 +27,7 @@ app.add_middleware(
 
 app.include_router(auth_router.router, prefix=settings.api_prefix)
 app.include_router(agents_router.router, prefix=settings.api_prefix)
+app.include_router(metrics_router.router, prefix=settings.api_prefix)
 
 
 @app.get("/health", tags=["System"])
