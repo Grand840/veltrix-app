@@ -23,6 +23,7 @@ from app.services.agents import (
     get_agent_by_id,
     get_agents,
 )
+from app.services.alerts import check_and_create_alerts
 
 router = APIRouter(prefix="/metrics", tags=["Metrics"])
 
@@ -54,6 +55,14 @@ async def ingest_metrics(
         hostname=payload.hostname,
         os_info="",
         ip_address="",
+        db=db,
+    )
+
+    check_and_create_alerts(
+        agent=agent,
+        cpu=payload.cpu_pct,
+        memory=payload.mem_used_pct,
+        disk=payload.disk_used_pct,
         db=db,
     )
 

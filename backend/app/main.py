@@ -1,3 +1,7 @@
+import asyncio
+import logging
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -10,7 +14,12 @@ from app.routers import auth as auth_router
 from app.routers import agents as agents_router
 from app.routers import metrics as metrics_router
 from app.routers import organization as org_router
+from app.routers import alerts as alerts_router
 from app.schemas.errors import VeltrixError, ErrorResponse
+from app.services.offline_detector import offline_detector_loop
+
+logger = logging.getLogger(__name__)
+
 
 desc = (
     "## Veltrix - Infrastructure Monitoring SaaS\n\n"
@@ -20,14 +29,28 @@ desc = (
     "Header : `X-Agent-Key: vltx_<api_key>`\n\n"
     "### Format des erreurs\n"
     "```json\n"
-    '{\n'
+    "{\n"
     '  "error": "AGENT_NOT_FOUND",\n'
     '  "message": "Agent introuvable",\n'
     '  "detail": null,\n'
     '  "status_code": 404\n'
-    '}\n'
+    "}\n"
     '```'
 )
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Demarrage de l'API Veltrix...")
+    offline_task = asyncio.create_task(offline_detector_loop())
+    logger.info("Job offline-detector demarre")
+    yield
+    offline_task.cancel()
+    try:
+        await offline_task
+    except asyncio.CancelledError:
+        pass
+    logger.info("API Veltrix arretee proprement")
+
 
 app = FastAPI(
     title=settings.app_name,
@@ -35,6 +58,7 @@ app = FastAPI(
     version=settings.app_version,
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
 
@@ -63,6 +87,7 @@ app.include_router(auth_router.router,    prefix=settings.api_prefix)
 app.include_router(agents_router.router,  prefix=settings.api_prefix)
 app.include_router(metrics_router.router, prefix=settings.api_prefix)
 app.include_router(org_router.router,     prefix=settings.api_prefix)
+app.include_router(alerts_router.router,  prefix=settings.api_prefix)
 
 
 @app.get("/health", tags=["System"])
@@ -72,7 +97,6 @@ async def health_check(db: Session = Depends(get_db)):
         db_status = "ok"
     except Exception as e:
         db_status = f"error: {str(e)}"
-
     return {
         "status": "ok" if db_status == "ok" else "degraded",
         "service": "veltrix-api",
@@ -85,3 +109,4 @@ async def health_check(db: Session = Depends(get_db)):
 @app.get("/", tags=["System"])
 async def root():
     return {"message": "Veltrix API is running", "docs": "/docs"}
+
