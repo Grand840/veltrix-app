@@ -28,15 +28,21 @@ from app.services.alerts import check_and_create_alerts
 router = APIRouter(prefix="/metrics", tags=["Metrics"])
 
 VALID_METRICS = [
-    "veltrix_cpu_usage_percent",
-    "veltrix_memory_usage_percent",
-    "veltrix_memory_used_mb",
-    "veltrix_memory_total_mb",
-    "veltrix_disk_usage_percent",
+    "veltrix_cpu_pct",
+    "veltrix_cpu_load_1",
+    "veltrix_cpu_load_5",
+    "veltrix_cpu_load_15",
+    "veltrix_mem_used_pct",
+    "veltrix_mem_used_gb",
+    "veltrix_mem_total_gb",
+    "veltrix_disk_used_pct",
     "veltrix_disk_used_gb",
     "veltrix_disk_total_gb",
     "veltrix_network_bytes_sent",
     "veltrix_network_bytes_recv",
+    "veltrix_network_bytes_sent_per_sec",
+    "veltrix_network_bytes_recv_per_sec",
+    "veltrix_uptime_seconds",
 ]
 
 

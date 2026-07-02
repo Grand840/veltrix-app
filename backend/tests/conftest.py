@@ -88,7 +88,10 @@ def clean_db():
     """Clean all tables before each test for full isolation."""
     with test_engine.connect() as conn:
         for table in reversed(Base.metadata.sorted_tables):
-            conn.execute(table.delete())
+            try:
+                conn.execute(table.delete())
+            except Exception:
+                pass
         conn.commit()
     yield
 
