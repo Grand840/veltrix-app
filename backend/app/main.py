@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
@@ -8,14 +9,47 @@ from app.database import get_db
 from app.routers import auth as auth_router
 from app.routers import agents as agents_router
 from app.routers import metrics as metrics_router
+from app.routers import organization as org_router
+from app.schemas.errors import VeltrixError, ErrorResponse
+
+desc = (
+    "## Veltrix - Infrastructure Monitoring SaaS\n\n"
+    "### Auth utilisateur\n"
+    "Header : `Authorization: Bearer <jwt_token>`\n\n"
+    "### Auth agent Go\n"
+    "Header : `X-Agent-Key: vltx_<api_key>`\n\n"
+    "### Format des erreurs\n"
+    "```json\n"
+    '{\n'
+    '  "error": "AGENT_NOT_FOUND",\n'
+    '  "message": "Agent introuvable",\n'
+    '  "detail": null,\n'
+    '  "status_code": 404\n'
+    '}\n'
+    '```'
+)
 
 app = FastAPI(
     title=settings.app_name,
-    description="## Veltrix - Infrastructure Monitoring SaaS\n\n### Auth utilisateur\nHeader : `Authorization: Bearer <jwt_token>`\n\n### Auth agent Go\nHeader : `X-Agent-Key: vltx_<api_key>`",
+    description=desc,
     version=settings.app_version,
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+
+@app.exception_handler(VeltrixError)
+async def veltrix_exception_handler(request: Request, exc: VeltrixError):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=ErrorResponse(
+            error=exc.error,
+            message=exc.veltrix_message,
+            detail=exc.veltrix_detail,
+            status_code=exc.status_code,
+        ).model_dump(),
+    )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,9 +59,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router.router, prefix=settings.api_prefix)
-app.include_router(agents_router.router, prefix=settings.api_prefix)
+app.include_router(auth_router.router,    prefix=settings.api_prefix)
+app.include_router(agents_router.router,  prefix=settings.api_prefix)
 app.include_router(metrics_router.router, prefix=settings.api_prefix)
+app.include_router(org_router.router,     prefix=settings.api_prefix)
 
 
 @app.get("/health", tags=["System"])

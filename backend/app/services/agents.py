@@ -65,11 +65,15 @@ def get_agents(
     db: Session,
     page: int = 1,
     per_page: int = 20,
+    status_filter: str = None,
 ) -> tuple[list[Agent], int]:
     query = db.query(Agent).filter(
         Agent.organization_id == organization_id,
         Agent.is_active == True,
     )
+
+    if status_filter:
+        query = query.filter(Agent.status == AgentStatus(status_filter))
 
     total = query.count()
     agents = (

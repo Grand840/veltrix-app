@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
+from typing import Optional
 
 from app.database import get_db
 from app.middleware.auth import get_current_user, get_current_org
@@ -12,6 +13,7 @@ from app.schemas.agent import (
     AgentListResponse,
     AgentInstallCommand,
 )
+from app.schemas.errors import NotFoundError, BadRequestError
 from app.services.agents import (
     create_agent,
     get_agents,
@@ -26,7 +28,7 @@ router = APIRouter(prefix="/agents", tags=["Agents"])
 @router.post(
     "",
     response_model=AgentInstallCommand,
-    status_code=status.HTTP_201_CREATED,
+    status_code=201,
     summary="Creer un agent",
 )
 def create(
@@ -38,12 +40,9 @@ def create(
     try:
         agent, api_key = create_agent(data, str(org.id), db)
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise BadRequestError(str(e), error="AGENT_LIMIT_REACHED")
 
-    install_cmd_dev = (
+    install_cmd = (
         f"VELTRIX_KEY={api_key} "
         f"VELTRIX_URL=http://localhost:8000 "
         f"./agent/veltrix-agent"
@@ -51,12 +50,9 @@ def create(
 
     return AgentInstallCommand(
         agent_id=str(agent.id),
-        install_command=install_cmd_dev,
+        install_command=install_cmd,
         api_key=api_key,
-        note=(
-            "Sauvegardez cette cle API maintenant. "
-            "Elle ne sera plus affichee apres cette page."
-        ),
+        note="Sauvegardez cette cle API maintenant. Elle ne sera plus affichee.",
     )
 
 
@@ -66,13 +62,27 @@ def create(
     summary="Lister les agents",
 )
 def list_agents(
-    page: int = Query(default=1, ge=1, description="Numero de page"),
-    per_page: int = Query(default=20, ge=1, le=100, description="Agents par page"),
+    page: int = Query(default=1, ge=1),
+    per_page: int = Query(default=20, ge=1, le=100),
+    status: Optional[str] = Query(
+        default=None,
+        description="Filtrer par statut : online, offline, pending, disabled"
+    ),
     current_user: User = Depends(get_current_user),
     org: Organization = Depends(get_current_org),
     db: Session = Depends(get_db),
 ):
-    agents, total = get_agents(str(org.id), db, page, per_page)
+    valid_statuses = ["online", "offline", "pending", "disabled"]
+    if status and status not in valid_statuses:
+        raise BadRequestError(
+            "Statut invalide. Valeurs acceptees : " + ", ".join(valid_statuses),
+            error="INVALID_STATUS_FILTER",
+        )
+
+    agents, total = get_agents(
+        str(org.id), db, page, per_page,
+        status_filter=status,
+    )
 
     return AgentListResponse(
         agents=[
@@ -98,11 +108,7 @@ def list_agents(
     )
 
 
-@router.get(
-    "/{agent_id}",
-    response_model=AgentResponse,
-    summary="Detail d un agent",
-)
+@router.get("/{agent_id}", response_model=AgentResponse, summary="Detail d un agent")
 def get_agent(
     agent_id: str,
     current_user: User = Depends(get_current_user),
@@ -111,10 +117,7 @@ def get_agent(
 ):
     agent = get_agent_by_id(agent_id, str(org.id), db)
     if not agent:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Agent introuvable"
-        )
+        raise NotFoundError("Agent")
 
     return AgentResponse(
         id=str(agent.id),
@@ -132,11 +135,7 @@ def get_agent(
     )
 
 
-@router.patch(
-    "/{agent_id}",
-    response_model=AgentResponse,
-    summary="Modifier un agent",
-)
+@router.patch("/{agent_id}", response_model=AgentResponse, summary="Modifier un agent")
 def update(
     agent_id: str,
     data: AgentUpdateRequest,
@@ -146,10 +145,7 @@ def update(
 ):
     agent = update_agent(agent_id, str(org.id), data, db)
     if not agent:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Agent introuvable"
-        )
+        raise NotFoundError("Agent")
 
     return AgentResponse(
         id=str(agent.id),
@@ -167,11 +163,7 @@ def update(
     )
 
 
-@router.delete(
-    "/{agent_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-    summary="Supprimer un agent",
-)
+@router.delete("/{agent_id}", status_code=204, summary="Supprimer un agent")
 def delete(
     agent_id: str,
     current_user: User = Depends(get_current_user),
@@ -180,7 +172,4 @@ def delete(
 ):
     deleted = delete_agent(agent_id, str(org.id), db)
     if not deleted:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Agent introuvable"
-        )
+        raise NotFoundError("Agent")

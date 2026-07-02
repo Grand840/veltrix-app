@@ -175,3 +175,29 @@
 - go vet ./... OK
 - go test ./... OK
 - Pipeline E2E valide
+
+
+## [0.0.9] - Jour 09 - API complete et erreurs standardisees
+
+### Ajoute
+- schemas/errors.py : format ErrorResponse standardise + classes VeltrixError, NotFoundError, BadRequestError
+- schemas/organization.py : OrganizationStats, OrganizationResponse
+- services/organization.py : get_organization_stats (agents par statut en 1 requete GROUP BY)
+- routers/organization.py : GET /organizations/me, GET /organizations/me/stats
+- Filtre ?status=online/offline/pending/disabled sur GET /agents
+- Handler global VeltrixError dans main.py
+- tests/test_organization.py : 11 nouveaux tests
+
+### Modifie
+- routers/agents.py : erreurs standardisees (NotFoundError, BadRequestError), filtre status
+- services/agents.py : get_agents accepte status_filter optionnel
+- main.py : exception_handler VeltrixError, router organisation ajoute
+
+### Technique
+- Toutes les erreurs 400/404 retournent {error, message, detail, status_code}
+- GET /organizations/me/stats : dashboard en 1 requete
+- GET /agents?status=online/offline/pending/disabled
+
+### Tests
+- 48/48 tests pytest passes
+- 10 tests manuels OK (routes, filtres, format erreur, OpenAPI)

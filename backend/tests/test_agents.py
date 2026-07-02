@@ -60,7 +60,7 @@ class TestCreateAgent:
             "name": "over-limit",
         }, headers=auth_headers)
         assert response.status_code == 400
-        assert "limite" in response.json()["detail"].lower()
+        assert "limite" in response.json()["message"].lower()
 
 
 class TestListAgents:

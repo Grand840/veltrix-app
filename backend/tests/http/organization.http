@@ -1,0 +1,40 @@
+### =============================================
+### Veltrix API - Tests Organisation
+### =============================================
+
+@base_url = http://localhost:8000/api/v1
+@token = REMPLACER_PAR_TON_TOKEN
+
+### 1. Mon organisation
+GET {{base_url}}/organizations/me
+Authorization: Bearer {{token}}
+
+###
+
+### 2. Statistiques de mon organisation
+GET {{base_url}}/organizations/me/stats
+Authorization: Bearer {{token}}
+
+###
+
+### 3. Liste agents filtree - online seulement
+GET {{base_url}}/agents?status=online
+Authorization: Bearer {{token}}
+
+###
+
+### 4. Liste agents filtree - pending
+GET {{base_url}}/agents?status=pending
+Authorization: Bearer {{token}}
+
+###
+
+### 5. Filtre statut invalide -> 400 standardise
+GET {{base_url}}/agents?status=invalid_status
+Authorization: Bearer {{token}}
+
+###
+
+### 6. Agent inexistant -> 404 standardise
+GET {{base_url}}/agents/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
