@@ -1,48 +1,39 @@
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
-.venv/
-venv/
-dist/
-build/
-*.egg
-.pytest_cache/
 
-# Go
+agent-v0.2.0
 /agent/veltrix-agent
-*.exe
-*.test
-
-# Node
-node_modules/
-.next/
-out/
-*.log
-
-# Environnement (CRITIQUE : ne jamais committer les secrets)
+build/
+*.db
+dist/
+.docker/
+# Docker
+.DS_Store
+*.egg
+*.egg-info/
 .env
+!.env.example
+# Environnement (CRITIQUE : ne jamais committer les secrets)
 .env.local
 .env.production
-!.env.example
-
-# Docker
-.docker/
-
+*.exe
+# Go
 # IDE
-.vscode/settings.json
 .idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-logs/
 *.log
-agent/veltrix-agent
-agent/veltrix-agent-*
+logs/
+# Logs
+.next/
+# Node
+node_modules/
+# OS
+out/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+# Python
+*.swo
+*.swp
+*.test
+Thumbs.db
 /tmp/veltrix-buffer/
-*.db
+.venv/
+.vscode/settings.json

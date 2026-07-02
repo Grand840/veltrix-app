@@ -1,86 +1,98 @@
 package collector
 
 import (
-	"fmt"
-	"os"
-	"strings"
+	"time"
+
+	"github.com/shirou/gopsutil/v3/cpu"
+	"github.com/shirou/gopsutil/v3/disk"
+	"github.com/shirou/gopsutil/v3/load"
+	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/shirou/gopsutil/v3/host"
 )
 
 type Metrics struct {
-	Hostname           string
-	OSInfo             string
-	IPAddress          string
-	CPUUsagePercent    float64
-	MemoryUsagePercent float64
-	MemoryUsedMB       float64
-	MemoryTotalMB      float64
-	DiskUsagePercent   float64
-	DiskUsedGB         float64
-	DiskTotalGB        float64
-	NetworkBytesSent   float64
-	NetworkBytesRecv   float64
+	Hostname               string
+	UptimeSeconds          uint64
+	CPUPct                 float64
+	CPULoad1               float64
+	CPULoad5               float64
+	CPULoad15              float64
+	MemTotalGB             float64
+	MemUsedGB              float64
+	MemUsedPct             float64
+	DiskTotalGB            float64
+	DiskUsedGB             float64
+	DiskUsedPct            float64
+	NetworkBytesSentTotal  uint64
+	NetworkBytesRecvTotal  uint64
+	NetworkBytesSentPerSec float64
+	NetworkBytesRecvPerSec float64
+}
+
+type CollectError struct {
+	Field string
+	Err   error
+}
+
+func (e *CollectError) Error() string {
+	return e.Field + ": " + e.Err.Error()
 }
 
 func Collect() (*Metrics, []error) {
 	m := &Metrics{}
-	var errors []error
+	var errs []error
 
-	hostname, err := os.Hostname()
+	hostInfo, err := host.Info()
 	if err != nil {
-		hostname = "unknown"
-	}
-	m.Hostname = hostname
-
-	m.OSInfo = getOSInfo()
-
-	cpuStats, err := CollectCPU()
-	if err != nil {
-		errors = append(errors, fmt.Errorf("cpu: %w", err))
+		errs = append(errs, &CollectError{Field: "hostname", Err: err})
 	} else {
-		m.CPUUsagePercent = cpuStats.UsagePercent
+		m.Hostname = hostInfo.Hostname
+		m.UptimeSeconds = hostInfo.Uptime
 	}
 
-	memStats, err := CollectMemory()
+	loadStats, err := load.Avg()
 	if err != nil {
-		errors = append(errors, fmt.Errorf("memory: %w", err))
+		errs = append(errs, &CollectError{Field: "load", Err: err})
 	} else {
-		m.MemoryUsagePercent = memStats.UsagePercent
-		m.MemoryUsedMB = memStats.UsedMB
-		m.MemoryTotalMB = memStats.TotalMB
+		m.CPULoad1 = loadStats.Load1
+		m.CPULoad5 = loadStats.Load5
+		m.CPULoad15 = loadStats.Load15
 	}
 
-	diskStats, err := CollectDisk()
+	cpuPct, err := cpu.Percent(time.Second, false)
 	if err != nil {
-		errors = append(errors, fmt.Errorf("disk: %w", err))
+		errs = append(errs, &CollectError{Field: "cpu_percent", Err: err})
+	} else if len(cpuPct) > 0 {
+		m.CPUPct = cpuPct[0]
+	}
+
+	memStats, err := mem.VirtualMemory()
+	if err != nil {
+		errs = append(errs, &CollectError{Field: "memory", Err: err})
 	} else {
-		m.DiskUsagePercent = diskStats.UsagePercent
-		m.DiskUsedGB = diskStats.UsedGB
-		m.DiskTotalGB = diskStats.TotalGB
+		m.MemTotalGB = float64(memStats.Total) / (1024 * 1024 * 1024)
+		m.MemUsedGB = float64(memStats.Used) / (1024 * 1024 * 1024)
+		m.MemUsedPct = memStats.UsedPercent
+	}
+
+	diskStats, err := disk.Usage("/")
+	if err != nil {
+		errs = append(errs, &CollectError{Field: "disk", Err: err})
+	} else {
+		m.DiskTotalGB = float64(diskStats.Total) / (1024 * 1024 * 1024)
+		m.DiskUsedGB = float64(diskStats.Used) / (1024 * 1024 * 1024)
+		m.DiskUsedPct = diskStats.UsedPercent
 	}
 
 	netStats, err := CollectNetwork()
 	if err != nil {
-		errors = append(errors, fmt.Errorf("network: %w", err))
+		errs = append(errs, &CollectError{Field: "network", Err: err})
 	} else {
-		m.NetworkBytesSent = float64(netStats.BytesSent)
-		m.NetworkBytesRecv = float64(netStats.BytesRecv)
+		m.NetworkBytesSentTotal = netStats.BytesSentTotal
+		m.NetworkBytesRecvTotal = netStats.BytesRecvTotal
+		m.NetworkBytesSentPerSec = netStats.BytesSentPerSec
+		m.NetworkBytesRecvPerSec = netStats.BytesRecvPerSec
 	}
 
-	return m, errors
-}
-
-func getOSInfo() string {
-	data, err := os.ReadFile("/etc/os-release")
-	if err != nil {
-		return "Linux"
-	}
-
-	for _, line := range strings.Split(string(data), "\n") {
-		if strings.HasPrefix(line, "PRETTY_NAME=") {
-			name := strings.TrimPrefix(line, "PRETTY_NAME=")
-			name = strings.Trim(name, "\"")
-			return name
-		}
-	}
-	return "Linux"
+	return m, errs
 }

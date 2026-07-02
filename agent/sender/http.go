@@ -5,117 +5,132 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"time"
+
+	"github.com/Grand840/veltrix-app/agent/collector"
 )
 
 type MetricPayload struct {
-	Hostname           string  `json:"hostname"`
-	OSInfo             string  `json:"os_info,omitempty"`
-	IPAddress          string  `json:"ip_address,omitempty"`
-	CPUUsagePercent    float64 `json:"cpu_usage_percent"`
-	MemoryUsagePercent float64 `json:"memory_usage_percent"`
-	MemoryUsedMB       float64 `json:"memory_used_mb"`
-	MemoryTotalMB      float64 `json:"memory_total_mb"`
-	DiskUsagePercent   float64 `json:"disk_usage_percent"`
-	DiskUsedGB         float64 `json:"disk_used_gb"`
-	DiskTotalGB        float64 `json:"disk_total_gb"`
-	NetworkBytesSent   float64 `json:"network_bytes_sent"`
-	NetworkBytesRecv   float64 `json:"network_bytes_recv"`
+	ApiKey                 string  `json:"api_key"`
+	Hostname               string  `json:"hostname"`
+	UptimeSeconds          uint64  `json:"uptime_seconds"`
+	CPUPct                 float64 `json:"cpu_pct"`
+	CPULoad1               float64 `json:"cpu_load_1"`
+	CPULoad5               float64 `json:"cpu_load_5"`
+	CPULoad15              float64 `json:"cpu_load_15"`
+	MemTotalGB             float64 `json:"mem_total_gb"`
+	MemUsedGB              float64 `json:"mem_used_gb"`
+	MemUsedPct             float64 `json:"mem_used_pct"`
+	DiskTotalGB            float64 `json:"disk_total_gb"`
+	DiskUsedGB             float64 `json:"disk_used_gb"`
+	DiskUsedPct            float64 `json:"disk_used_pct"`
+	NetworkBytesSent       uint64  `json:"network_bytes_sent"`
+	NetworkBytesRecv       uint64  `json:"network_bytes_recv"`
+	NetworkBytesSentPerSec float64 `json:"network_bytes_sent_per_sec"`
+	NetworkBytesRecvPerSec float64 `json:"network_bytes_recv_per_sec"`
 }
 
 type Sender struct {
-	apiURL string
-	apiKey string
-	client *http.Client
-	buffer *Buffer
+	baseURL    string
+	apiKey     string
+	httpClient *http.Client
+	buffer     [][]byte
 }
 
-func NewSender(apiURL, apiKey string, timeout time.Duration, bufferDir string, maxBuf int) (*Sender, error) {
-	buf, err := NewBuffer(bufferDir, maxBuf)
-	if err != nil {
-		return nil, err
-	}
-
+func New(baseURL, apiKey string) *Sender {
 	return &Sender{
-		apiURL: apiURL,
-		apiKey: apiKey,
-		client: &http.Client{Timeout: timeout},
-		buffer: buf,
-	}, nil
+		baseURL:    baseURL,
+		apiKey:     apiKey,
+		httpClient: &http.Client{Timeout: 10 * time.Second},
+		buffer:     make([][]byte, 0),
+	}
 }
 
-func (s *Sender) Send(payload *MetricPayload) error {
-	s.flushBuffer()
-
-	if err := s.sendHTTP(payload); err != nil {
-		log.Printf("[WARN] Envoi échoué, mise en buffer: %v", err)
-		if bufErr := s.buffer.Save(payload); bufErr != nil {
-			log.Printf("[ERROR] Impossible de bufferiser: %v", bufErr)
-		} else {
-			log.Printf("[INFO] Payload bufferisé (%d en attente)", s.buffer.Size())
-		}
-		return err
-	}
-
-	return nil
-}
-
-func (s *Sender) sendHTTP(payload *MetricPayload) error {
-	data, err := json.Marshal(payload)
+func (s *Sender) sendRequest(payload []byte) error {
+	url := s.baseURL + "/api/v1/metrics/ingest"
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(payload))
 	if err != nil {
-		return fmt.Errorf("sérialisation: %w", err)
+		return fmt.Errorf("create request: %w", err)
 	}
-
-	req, err := http.NewRequest("POST",
-		s.apiURL+"/api/v1/metrics/ingest",
-		bytes.NewBuffer(data),
-	)
-	if err != nil {
-		return fmt.Errorf("création requête: %w", err)
-	}
-
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Agent-Key", s.apiKey)
-	req.Header.Set("User-Agent", "veltrix-agent/0.1.0")
 
-	resp, err := s.client.Do(req)
+	resp, err := s.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("réseau: %w", err)
+		return fmt.Errorf("request: %w", err)
 	}
 	defer resp.Body.Close()
 
-	io.ReadAll(resp.Body)
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("API retourne HTTP %d", resp.StatusCode)
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(body))
 	}
-
 	return nil
 }
 
-func (s *Sender) flushBuffer() {
-	pending, err := s.buffer.LoadAll()
-	if err != nil || len(pending) == 0 {
-		return
+func (s *Sender) Send(metrics *collector.Metrics) error {
+	payload := MetricPayload{
+		ApiKey:                 s.apiKey,
+		Hostname:               metrics.Hostname,
+		UptimeSeconds:          metrics.UptimeSeconds,
+		CPUPct:                 metrics.CPUPct,
+		CPULoad1:               metrics.CPULoad1,
+		CPULoad5:               metrics.CPULoad5,
+		CPULoad15:              metrics.CPULoad15,
+		MemTotalGB:             metrics.MemTotalGB,
+		MemUsedGB:              metrics.MemUsedGB,
+		MemUsedPct:             metrics.MemUsedPct,
+		DiskTotalGB:            metrics.DiskTotalGB,
+		DiskUsedGB:             metrics.DiskUsedGB,
+		DiskUsedPct:            metrics.DiskUsedPct,
+		NetworkBytesSent:       metrics.NetworkBytesSentTotal,
+		NetworkBytesRecv:       metrics.NetworkBytesRecvTotal,
+		NetworkBytesSentPerSec: metrics.NetworkBytesSentPerSec,
+		NetworkBytesRecvPerSec: metrics.NetworkBytesRecvPerSec,
 	}
 
-	log.Printf("[INFO] Vidage du buffer: %d payload(s) en attente", len(pending))
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("marshal: %w", err)
+	}
 
-	for _, item := range pending {
-		var payload MetricPayload
-		if err := json.Unmarshal(item.Data, &payload); err != nil {
-			s.buffer.Delete(item.Path)
+	delays := []time.Duration{1 * time.Second, 2 * time.Second, 4 * time.Second}
+
+	for attempt := 0; attempt < 4; attempt++ {
+		err = s.sendRequest(data)
+		if err == nil {
+			return nil
+		}
+		if attempt < 3 {
+			time.Sleep(delays[attempt])
+		}
+	}
+
+	s.buffer = append(s.buffer, data)
+	if len(s.buffer) > 100 {
+		s.buffer = s.buffer[len(s.buffer)-100:]
+	}
+	return fmt.Errorf("after 3 retries (%d queued): %w", len(s.buffer), err)
+}
+
+func (s *Sender) Flush() (int, error) {
+	sent := 0
+	var lastErr error
+	for _, data := range s.buffer {
+		err := s.sendRequest(data)
+		if err != nil {
+			lastErr = err
 			continue
 		}
-
-		if err := s.sendHTTP(&payload); err != nil {
-			log.Printf("[WARN] Buffer flush échoué: %v — arrêt du vidage", err)
-			return
-		}
-
-		s.buffer.Delete(item.Path)
-		log.Printf("[INFO] Payload bufferisé envoyé et supprimé")
+		sent++
 	}
+	if sent > 0 {
+		s.buffer = make([][]byte, 0)
+	}
+	return sent, lastErr
+}
+
+func (s *Sender) BufferSize() int {
+	return len(s.buffer)
 }

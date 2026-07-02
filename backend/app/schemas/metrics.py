@@ -1,30 +1,37 @@
-from pydantic import BaseModel, Field, field_validator
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+from pydantic import BaseModel, Field
 
 
 class MetricPayload(BaseModel):
-    hostname: str
-    os_info: Optional[str] = None
-    ip_address: Optional[str] = None
+    api_key: str = Field(..., min_length=1)
+    hostname: str = Field(..., min_length=1)
+    uptime_seconds: Optional[int] = Field(default=0, ge=0)
+    cpu_pct: Optional[float] = Field(default=0.0, ge=0.0, le=100.0)
+    cpu_load_1: Optional[float] = Field(default=0.0, ge=0.0)
+    cpu_load_5: Optional[float] = Field(default=0.0, ge=0.0)
+    cpu_load_15: Optional[float] = Field(default=0.0, ge=0.0)
+    mem_total_gb: Optional[float] = Field(default=0.0, ge=0.0)
+    mem_used_gb: Optional[float] = Field(default=0.0, ge=0.0)
+    mem_used_pct: Optional[float] = Field(default=0.0, ge=0.0, le=100.0)
+    disk_total_gb: Optional[float] = Field(default=0.0, ge=0.0)
+    disk_used_gb: Optional[float] = Field(default=0.0, ge=0.0)
+    disk_used_pct: Optional[float] = Field(default=0.0, ge=0.0, le=100.0)
+    network_bytes_sent: Optional[float] = Field(default=0.0, ge=0.0, description="Cumulative total bytes sent")
+    network_bytes_recv: Optional[float] = Field(default=0.0, ge=0.0, description="Cumulative total bytes received")
+    network_bytes_sent_per_sec: Optional[float] = Field(default=0.0, ge=0.0, description="Network bytes sent per second (delta)")
+    network_bytes_recv_per_sec: Optional[float] = Field(default=0.0, ge=0.0, description="Network bytes received per second (delta)")
 
-    cpu_usage_percent: float = Field(ge=0.0, le=100.0)
-    memory_usage_percent: float = Field(ge=0.0, le=100.0)
-    memory_used_mb: float = Field(ge=0.0)
-    memory_total_mb: float = Field(ge=0.0)
-    disk_usage_percent: float = Field(ge=0.0, le=100.0)
-    disk_used_gb: float = Field(ge=0.0)
-    disk_total_gb: float = Field(ge=0.0)
-    network_bytes_sent: Optional[float] = Field(default=0.0, ge=0.0)
-    network_bytes_recv: Optional[float] = Field(default=0.0, ge=0.0)
-    timestamp: Optional[datetime] = None
+    class Config:
+        from_attributes = True
 
-    @field_validator("hostname")
-    @classmethod
-    def hostname_not_empty(cls, v: str) -> str:
-        if not v.strip():
-            raise ValueError("hostname ne peut pas etre vide")
-        return v.strip()
+
+class MetricsResponse(MetricPayload):
+    id: int
+    recorded_at: datetime
+
+    class Config:
+        from_attributes = True
 
 
 class MetricPoint(BaseModel):

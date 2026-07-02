@@ -13,15 +13,21 @@ from app.schemas.metrics import (
 
 
 METRIC_NAMES = [
-    "veltrix_cpu_usage_percent",
-    "veltrix_memory_usage_percent",
-    "veltrix_memory_used_mb",
-    "veltrix_memory_total_mb",
-    "veltrix_disk_usage_percent",
+    "veltrix_cpu_pct",
+    "veltrix_cpu_load_1",
+    "veltrix_cpu_load_5",
+    "veltrix_cpu_load_15",
+    "veltrix_mem_used_pct",
+    "veltrix_mem_used_gb",
+    "veltrix_mem_total_gb",
+    "veltrix_disk_used_pct",
     "veltrix_disk_used_gb",
     "veltrix_disk_total_gb",
     "veltrix_network_bytes_sent",
     "veltrix_network_bytes_recv",
+    "veltrix_network_bytes_sent_per_sec",
+    "veltrix_network_bytes_recv_per_sec",
+    "veltrix_uptime_seconds",
 ]
 
 
@@ -40,7 +46,7 @@ async def write_metrics(
     org_id: str,
     payload: MetricPayload,
 ) -> bool:
-    if payload.timestamp:
+    if hasattr(payload, "timestamp") and payload.timestamp:
         ts_ms = int(payload.timestamp.timestamp() * 1000)
     else:
         ts_ms = int(time.time() * 1000)
@@ -52,15 +58,21 @@ async def write_metrics(
     }
 
     metric_map = {
-        "veltrix_cpu_usage_percent":    payload.cpu_usage_percent,
-        "veltrix_memory_usage_percent": payload.memory_usage_percent,
-        "veltrix_memory_used_mb":       payload.memory_used_mb,
-        "veltrix_memory_total_mb":      payload.memory_total_mb,
-        "veltrix_disk_usage_percent":   payload.disk_usage_percent,
-        "veltrix_disk_used_gb":         payload.disk_used_gb,
-        "veltrix_disk_total_gb":        payload.disk_total_gb,
-        "veltrix_network_bytes_sent":   payload.network_bytes_sent or 0.0,
-        "veltrix_network_bytes_recv":   payload.network_bytes_recv or 0.0,
+        "veltrix_cpu_pct":                  payload.cpu_pct or 0.0,
+        "veltrix_cpu_load_1":               payload.cpu_load_1 or 0.0,
+        "veltrix_cpu_load_5":               payload.cpu_load_5 or 0.0,
+        "veltrix_cpu_load_15":              payload.cpu_load_15 or 0.0,
+        "veltrix_mem_used_pct":             payload.mem_used_pct or 0.0,
+        "veltrix_mem_used_gb":              payload.mem_used_gb or 0.0,
+        "veltrix_mem_total_gb":             payload.mem_total_gb or 0.0,
+        "veltrix_disk_used_pct":            payload.disk_used_pct or 0.0,
+        "veltrix_disk_used_gb":             payload.disk_used_gb or 0.0,
+        "veltrix_disk_total_gb":            payload.disk_total_gb or 0.0,
+        "veltrix_network_bytes_sent":       payload.network_bytes_sent or 0.0,
+        "veltrix_network_bytes_recv":       payload.network_bytes_recv or 0.0,
+        "veltrix_network_bytes_sent_per_sec": payload.network_bytes_sent_per_sec or 0.0,
+        "veltrix_network_bytes_recv_per_sec": payload.network_bytes_recv_per_sec or 0.0,
+        "veltrix_uptime_seconds":           payload.uptime_seconds or 0,
     }
 
     lines = [
@@ -193,9 +205,9 @@ async def get_agent_summary(
     status: str,
     last_seen_at: Optional[datetime],
 ) -> AgentMetricsSummary:
-    cpu = await query_instant("veltrix_cpu_usage_percent", agent_id)
-    memory = await query_instant("veltrix_memory_usage_percent", agent_id)
-    disk = await query_instant("veltrix_disk_usage_percent", agent_id)
+    cpu = await query_instant("veltrix_cpu_pct", agent_id)
+    memory = await query_instant("veltrix_mem_used_pct", agent_id)
+    disk = await query_instant("veltrix_disk_used_pct", agent_id)
 
     return AgentMetricsSummary(
         agent_id=agent_id,

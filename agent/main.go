@@ -1,95 +1,78 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/Grand840/veltrix-app/agent/collector"
+	"github.com/Grand840/veltrix-app/agent/logger"
 	"github.com/Grand840/veltrix-app/agent/sender"
 )
 
-const version = "0.1.0"
+func runCycle(log *logger.Logger, snd *sender.Sender) {
+	metrics, errs := collector.Collect()
 
-func main() {
-	log.Printf("=== Veltrix Agent v%s ===", version)
-
-	cfg, err := LoadConfig()
-	if err != nil {
-		log.Fatalf("[FATAL] Configuration invalide: %v", err)
-	}
-
-	log.Printf("[INFO] API URL   : %s", cfg.APIURL)
-	log.Printf("[INFO] Intervalle: %s", cfg.Interval)
-	log.Printf("[INFO] Buffer dir: %s", cfg.BufferDir)
-
-	s, err := sender.NewSender(
-		cfg.APIURL,
-		cfg.APIKey,
-		cfg.HTTPTimeout,
-		cfg.BufferDir,
-		cfg.MaxBufferSize,
-	)
-	if err != nil {
-		log.Fatalf("[FATAL] Impossible d'initialiser le sender: %v", err)
-	}
-
-	log.Printf("[INFO] Agent démarré — envoi toutes les %s", cfg.Interval)
-
-	runCycle(s)
-
-	ticker := time.NewTicker(cfg.Interval)
-	defer ticker.Stop()
-
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-
-	for {
-		select {
-		case <-ticker.C:
-			runCycle(s)
-
-		case sig := <-sigChan:
-			log.Printf("[INFO] Signal reçu: %v — arrêt propre en cours...", sig)
-			ticker.Stop()
-			log.Printf("[INFO] Agent arrêté proprement.")
-			os.Exit(0)
+	if len(errs) > 0 {
+		for _, e := range errs {
+			log.Warn("collect warning", logger.F("field", e.(*collector.CollectError).Field, "error", e.Error()))
 		}
+	}
+
+	err := snd.Send(metrics)
+	if err != nil {
+		log.Error("send failed", logger.F("error", err.Error()))
+	} else {
+		log.Info("metrics sent",
+			logger.F(
+				"cpu", fmt.Sprintf("%.1f%%", metrics.CPUPct),
+				"load", fmt.Sprintf("%.2f", metrics.CPULoad1),
+				"mem", fmt.Sprintf("%.1f%%", metrics.MemUsedPct),
+				"disk", fmt.Sprintf("%.1f%%", metrics.DiskUsedPct),
+				"net_sent_kbps", fmt.Sprintf("%.1f", metrics.NetworkBytesSentPerSec/1024),
+				"net_recv_kbps", fmt.Sprintf("%.1f", metrics.NetworkBytesRecvPerSec/1024),
+			),
+		)
 	}
 }
 
-func runCycle(s *sender.Sender) {
-	metrics, errs := collector.Collect()
-	if len(errs) > 0 {
-		for _, e := range errs {
-			log.Printf("[WARN] Collecte partielle: %v", e)
+func main() {
+	apiURL := os.Getenv("VELTRIX_API_URL")
+	if apiURL == "" {
+		apiURL = "http://localhost:8000"
+	}
+	apiKey := os.Getenv("VELTRIX_API_KEY")
+	if apiKey == "" {
+		apiKey = "dev-key"
+	}
+
+	log := logger.New(logger.INFO)
+	snd := sender.New(apiURL, apiKey)
+
+	log.Info("agent starting",
+		logger.F("api_url", apiURL, "interval", "15s"),
+	)
+
+	ticker := time.NewTicker(15 * time.Second)
+	defer ticker.Stop()
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+
+	runCycle(log, snd)
+
+	running := true
+	for running {
+		select {
+		case <-ticker.C:
+			runCycle(log, snd)
+		case sig := <-sigCh:
+			log.Info("shutting down", logger.F("signal", sig.String()))
+			sent, _ := snd.Flush()
+			log.Info("flushed buffer", logger.F("sent", sent))
+			running = false
 		}
-	}
-
-	payload := &sender.MetricPayload{
-		Hostname:           metrics.Hostname,
-		OSInfo:             metrics.OSInfo,
-		CPUUsagePercent:    metrics.CPUUsagePercent,
-		MemoryUsagePercent: metrics.MemoryUsagePercent,
-		MemoryUsedMB:       metrics.MemoryUsedMB,
-		MemoryTotalMB:      metrics.MemoryTotalMB,
-		DiskUsagePercent:   metrics.DiskUsagePercent,
-		DiskUsedGB:         metrics.DiskUsedGB,
-		DiskTotalGB:        metrics.DiskTotalGB,
-		NetworkBytesSent:   metrics.NetworkBytesSent,
-		NetworkBytesRecv:   metrics.NetworkBytesRecv,
-	}
-
-	if err := s.Send(payload); err != nil {
-		log.Printf("[WARN] Cycle échoué: %v", err)
-	} else {
-		log.Printf(
-			"[OK] CPU=%.1f%% RAM=%.1f%% Disk=%.1f%%",
-			metrics.CPUUsagePercent,
-			metrics.MemoryUsagePercent,
-			metrics.DiskUsagePercent,
-		)
 	}
 }

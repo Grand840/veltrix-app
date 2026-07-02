@@ -52,8 +52,8 @@ async def ingest_metrics(
     update_agent_heartbeat(
         agent=agent,
         hostname=payload.hostname,
-        os_info=payload.os_info or "",
-        ip_address=payload.ip_address or "",
+        os_info="",
+        ip_address="",
         db=db,
     )
 

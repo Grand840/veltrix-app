@@ -148,3 +148,30 @@
 - Jour 05 : Metriques -> VictoriaMetrics (ingest, summary, history, overview)
 - Jour 06 : Agent Go v0.1 (collecte CPU/RAM/Disk/Network + store-and-forward)
 - Jour 07 : Tests pytest automatises + documentation + pipeline bout-en-bout
+
+
+## [0.0.8] - Jour 08 - Agent v0.2
+
+### Ajoute
+- agent/logger/logger.go: logger structure JSON
+- agent/collector/network.go: calcul delta bytes/sec
+- agent/sender/http.go: retry exponentiel 1s/2s/4s avant buffer
+- backend/app/schemas/metrics.py: nouveaux champs reseau delta
+
+### Modifie
+- agent/collector/collector.go: Metrics enrichie nouveaux champs reseau
+- agent/main.go: utilise logger structure
+- agent/sender/http.go: header X-Agent-Key pour auth API
+- backend/app/services/metrics.py: 15 metriques Prometheus
+
+### Technique
+- Binaire statique Go ~5.3MB
+- Logs JSON parsables par jq
+- Retry exponentiel 3 tentatives puis buffer memoire max 100
+- Toutes metriques dans VictoriaMetrics
+
+### Tests
+- 37/37 tests pytest verts
+- go vet ./... OK
+- go test ./... OK
+- Pipeline E2E valide
