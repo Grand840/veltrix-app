@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { formatDistanceToNow, format } from "date-fns";
 import { fr } from "date-fns/locale";
-import type { HealthStatus, AgentStatus } from "@/types";
+import type { HealthStatus, AgentStatus, AlertSeverity } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -72,5 +72,13 @@ export function severityColor(severity: string): string {
     case "critical": return "text-red-700 bg-red-50 border-red-200";
     case "warning": return "text-yellow-700 bg-yellow-50 border-yellow-200";
     default: return "text-blue-700 bg-blue-50 border-blue-200";
+  }
+}
+
+export function severityBadgeVariant(severity: AlertSeverity): "destructive" | "secondary" | "default" {
+  switch (severity) {
+    case "critical": return "destructive";
+    case "warning": return "secondary";
+    default: return "default";
   }
 }
