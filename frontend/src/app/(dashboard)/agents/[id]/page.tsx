@@ -31,9 +31,9 @@ export default function AgentDetailPage() {
 
   const { summary, isLoading: summaryLoading } = useAgentSummary(agentId);
 
-  const { points: cpuPoints, isLoading: cpuLoading } = useMetricHistory({ agentId, metric: "veltrix_cpu_usage_percent", range });
-  const { points: ramPoints, isLoading: ramLoading } = useMetricHistory({ agentId, metric: "veltrix_memory_usage_percent", range });
-  const { points: diskPoints, isLoading: diskLoading } = useMetricHistory({ agentId, metric: "veltrix_disk_usage_percent", range });
+  const { points: cpuPoints, isLoading: cpuLoading } = useMetricHistory({ agentId, metric: "veltrix_cpu_pct", range });
+  const { points: ramPoints, isLoading: ramLoading } = useMetricHistory({ agentId, metric: "veltrix_mem_used_pct", range });
+  const { points: diskPoints, isLoading: diskLoading } = useMetricHistory({ agentId, metric: "veltrix_disk_used_pct", range });
 
   if (agentLoading) {
     return (

@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 class MetricPayload(BaseModel):
     api_key: str = Field(..., min_length=1)
     hostname: str = Field(..., min_length=1)
+    os_info: Optional[str] = Field(default=None, description="Systeme d exploitation de l agent")
+    ip_address: Optional[str] = Field(default=None, description="Adresse IP de l agent")
     uptime_seconds: Optional[int] = Field(default=0, ge=0)
     cpu_pct: Optional[float] = Field(default=0.0, ge=0.0, le=100.0)
     cpu_load_1: Optional[float] = Field(default=0.0, ge=0.0)
