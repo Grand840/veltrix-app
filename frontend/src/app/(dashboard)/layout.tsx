@@ -6,14 +6,18 @@ import Link from "next/link";
 import { LayoutDashboard, Server, Bell, Settings, LogOut, Activity } from "lucide-react";
 import { useAuthStore } from "@/store/auth.store";
 import { useAuth } from "@/hooks/useAuth";
+import { useAlerts } from "@/hooks/useAlerts";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
-  { href: "/dashboard", label: "Vue d'ensemble", icon: LayoutDashboard },
-  { href: "/agents", label: "Agents", icon: Server },
-  { href: "/alerts", label: "Alertes", icon: Bell },
-  { href: "/settings", label: "Parametres", icon: Settings },
-];
+function AlertsBadge() {
+  const { totalFiring } = useAlerts({ status: "firing" });
+  if (!totalFiring) return null;
+  return (
+    <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-5 flex items-center justify-center px-1">
+      {totalFiring > 99 ? "99+" : totalFiring}
+    </span>
+  );
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -22,8 +26,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { logout } = useAuth();
 
   useEffect(() => { if (!isAuthenticated) router.push("/login"); }, [isAuthenticated, router]);
-
   if (!isAuthenticated) return null;
+
+  const NAV_ITEMS = [
+    { href: "/dashboard", label: "Vue d'ensemble", icon: LayoutDashboard, badge: null },
+    { href: "/agents",    label: "Agents",          icon: Server,          badge: null },
+    { href: "/alerts",    label: "Alertes",          icon: Bell,            badge: <AlertsBadge /> },
+    { href: "/settings",  label: "Paramètres",       icon: Settings,        badge: null },
+  ];
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -40,8 +50,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
         <nav className="flex-1 p-4 space-y-1">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href;
+          {NAV_ITEMS.map(({ href, label, icon: Icon, badge }) => {
+            const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
             return (
               <Link key={href} href={href}
                 className={cn("flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
@@ -49,15 +59,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 )}>
                 <Icon className="h-4 w-4 flex-shrink-0" />
                 {label}
+                {badge}
               </Link>
             );
           })}
         </nav>
         <div className="p-4 border-t border-gray-200">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-xs font-medium text-gray-600">
-                {user?.full_name?.[0] || user?.email?.[0]?.toUpperCase()}
+            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-xs font-bold text-blue-700">
+                {(user?.full_name?.[0] || user?.email?.[0] || "?").toUpperCase()}
               </span>
             </div>
             <div className="flex-1 min-w-0">
@@ -67,13 +78,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
           <button onClick={logout}
             className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 w-full px-2 py-1 rounded hover:bg-gray-100 transition-colors">
-            <LogOut className="h-4 w-4" /> Deconnexion
+            <LogOut className="h-4 w-4" /> Déconnexion
           </button>
         </div>
       </aside>
-      <main className="flex-1 overflow-auto">
-        <div className="p-8">{children}</div>
-      </main>
+      <main className="flex-1 overflow-auto"><div className="p-8">{children}</div></main>
     </div>
   );
 }
