@@ -201,3 +201,30 @@
 ### Tests
 - 48/48 tests pytest passes
 - 10 tests manuels OK (routes, filtres, format erreur, OpenAPI)
+## [0.1.5] - Jour 18 - Polish UI + Préparation déploiement
+
+### Ajouté
+- `src/app/not-found.tsx` : page 404 personnalisée
+- `src/components/ui/error-state.tsx` : composants ErrorState et EmptyState réutilisables
+- `src/components/providers/SWRProvider.tsx` : config SWR globale (retry, dedup, reconnect)
+- `src/app/api/health/route.ts` : endpoint health check Next.js (`/api/health`)
+- `next.config.mjs` : mode standalone activé pour Docker
+- `frontend/Dockerfile` : multi-stage build (builder → runner, utilisateur non-root)
+- `docker-compose.prod.yml` : stack production complète (Caddy + HTTPS auto)
+- `infra/Caddyfile` : reverse proxy avec HTTPS automatique Let's Encrypt
+- `deploy.sh` : script de déploiement (build + migrate + health check)
+- `.env.production` + `.env.example` mis à jour
+
+### Bilan Semaine 2
+- ✅ Jour 13 : Setup Next.js 14 (TypeScript, Tailwind, shadcn, Zustand, SWR, Axios)
+- ✅ Jour 14 : Login + Register avec validation inline et connexion API réelle
+- ✅ Jour 15 : Dashboard avec métriques temps réel (SWR 30s, skeletons, états vides)
+- ✅ Jour 16 : Graphes Recharts + page détail agent (1h/24h/7j)
+- ✅ Jour 17 : Page alertes + paramètres + correction noms métriques
+- ✅ Jour 18 : Polish UI + infrastructure de déploiement
+
+### Métriques projet
+- 19 endpoints API backend
+- 82+ tests automatisés backend
+- ~30 composants React
+- Build Next.js standalone < 50MB
