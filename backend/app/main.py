@@ -77,7 +77,7 @@ async def veltrix_exception_handler(request: Request, exc: VeltrixError):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://10.0.40.20:3000"],
+    allow_origins=["http://localhost:3000", "http://10.0.40.20:3000", "https://veltrix.ddns.net"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

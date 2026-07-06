@@ -1,8 +1,8 @@
 import axios, { AxiosError } from "axios";
 import type { TokenResponse, UserResponse, OrganizationStats, Agent, AgentListResponse, AgentInstallCommand, AgentMetricsSummary, MetricSeries, AlertListResponse, Alert } from "@/types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const API_PREFIX = `${API_URL}/api/v1`;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_PREFIX = API_URL ? `${API_URL}/api/v1` : "/api/v1";
 
 export const apiClient = axios.create({
   baseURL: API_PREFIX,
