@@ -14,6 +14,8 @@ import (
 type MetricPayload struct {
 	ApiKey                 string  `json:"api_key"`
 	Hostname               string  `json:"hostname"`
+	OSInfo                 string  `json:"os_info"`
+	IPAddress              string  `json:"ip_address"`
 	UptimeSeconds          uint64  `json:"uptime_seconds"`
 	CPUPct                 float64 `json:"cpu_pct"`
 	CPULoad1               float64 `json:"cpu_load_1"`
@@ -73,6 +75,8 @@ func (s *Sender) Send(metrics *collector.Metrics) error {
 	payload := MetricPayload{
 		ApiKey:                 s.apiKey,
 		Hostname:               metrics.Hostname,
+		OSInfo:                 metrics.OSInfo,
+		IPAddress:              metrics.IPAddress,
 		UptimeSeconds:          metrics.UptimeSeconds,
 		CPUPct:                 metrics.CPUPct,
 		CPULoad1:               metrics.CPULoad1,

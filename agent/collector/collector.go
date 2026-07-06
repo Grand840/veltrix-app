@@ -1,17 +1,21 @@
 package collector
 
 import (
+	"net"
 	"time"
+	"strings"
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
+	"github.com/shirou/gopsutil/v3/host"
 	"github.com/shirou/gopsutil/v3/load"
 	"github.com/shirou/gopsutil/v3/mem"
-	"github.com/shirou/gopsutil/v3/host"
 )
 
 type Metrics struct {
 	Hostname               string
+	OSInfo                 string
+	IPAddress              string
 	UptimeSeconds          uint64
 	CPUPct                 float64
 	CPULoad1               float64
@@ -38,6 +42,35 @@ func (e *CollectError) Error() string {
 	return e.Field + ": " + e.Err.Error()
 }
 
+func getPrimaryIP() string {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return ""
+	}
+	for _, iface := range interfaces {
+		if iface.Flags&net.FlagLoopback != 0 {
+			continue
+		}
+		if iface.Flags&net.FlagUp == 0 {
+			continue
+		}
+		addrs, err := iface.Addrs()
+		if err != nil {
+			continue
+		}
+		for _, addr := range addrs {
+			ipnet, ok := addr.(*net.IPNet)
+			if !ok || ipnet.IP.IsLoopback() {
+				continue
+			}
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return ""
+}
+
 func Collect() (*Metrics, []error) {
 	m := &Metrics{}
 	var errs []error
@@ -48,7 +81,20 @@ func Collect() (*Metrics, []error) {
 	} else {
 		m.Hostname = hostInfo.Hostname
 		m.UptimeSeconds = hostInfo.Uptime
+		osParts := []string{}
+		if hostInfo.Platform != "" {
+			osParts = append(osParts, hostInfo.Platform)
+		}
+		if hostInfo.PlatformVersion != "" {
+			osParts = append(osParts, hostInfo.PlatformVersion)
+		}
+		if hostInfo.KernelVersion != "" {
+			osParts = append(osParts, hostInfo.KernelVersion)
+		}
+		m.OSInfo = strings.Join(osParts, " ")
 	}
+
+	m.IPAddress = getPrimaryIP()
 
 	loadStats, err := load.Avg()
 	if err != nil {
