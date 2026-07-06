@@ -1,4 +1,5 @@
 services:
+
   postgres:
     image: postgres:16-alpine
     restart: always
@@ -45,9 +46,10 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     restart: always
+    env_file:
+      - .env.production
     expose:
       - "8000"
-      - .env.production
     environment:
       POSTGRES_HOST: postgres
       REDIS_URL: redis://redis:6379
@@ -67,7 +69,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ${API_PUBLIC_URL:-https://api.veltrix.io}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://veltrix.ddns.net}
     restart: always
     expose:
       - "3000"
@@ -79,11 +81,8 @@ services:
     restart: always
     ports:
       - "80:80"
-      - "443:443"
     volumes:
-      - ./infra/Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
+      - ./infra/Caddyfile:/etc/caddy/Caddyfile:ro
     depends_on:
       - api
       - frontend
@@ -92,5 +91,3 @@ volumes:
   postgres_data:
   redis_data:
   victoria_data:
-  caddy_data:
-  caddy_config:
