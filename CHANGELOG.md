@@ -228,3 +228,23 @@
 - 82+ tests automatisés backend
 - ~30 composants React
 - Build Next.js standalone < 50MB
+
+### Ajouté
+-  : landing page complète (Hero, DashboardPreview, Features, HowItWorks, Pricing, CTA, Footer)
+- Navbar fixe avec CTA Essai gratuit
+- Simulation dashboard (preview statique des cartes agents)
+- Section features (6 fonctionnalités clés)
+- Section Comment ça marche (3 étapes)
+- Section pricing (3 plans : Gratuit/Starter/Pro en XOF)
+- Footer avec liens et Made in Togo
+
+## [0.1.7] - Jour 21 - Landing Page publique
+
+### Ajouté
+- landing page complete (Hero, DashboardPreview, Features, HowItWorks, Pricing, CTA, Footer)
+- Navbar fixe avec CTA Essai gratuit
+- Simulation dashboard (preview statique des cartes agents)
+- Section features (6 fonctionnalites cles)
+- 3-step HowItWorks
+- Section pricing (3 plans: Gratuit/Starter/Pro en XOF)
+- Footer avec liens et Made in Togo
