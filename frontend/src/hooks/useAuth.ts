@@ -43,6 +43,7 @@ export function useAuth() {
       const { access_token } = tokenResp.data;
       document.cookie = `veltrix_token=${access_token}; path=/; max-age=1800; SameSite=Lax`;
       localStorage.setItem("veltrix_token", access_token);
+      localStorage.removeItem("veltrix_onboarding_dismissed");
       const userResp = await authApi.me();
       setAuth(access_token, userResp.data);
       router.push("/dashboard");
