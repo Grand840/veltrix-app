@@ -52,30 +52,30 @@ function Hero() {
           Surveillez votre{" "}
           <span className="text-blue-600">infrastructure</span>
           <br />
-          en temps réel
+          en temps r&eacute;el
         </h1>
         <p className="mt-6 text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
-          Veltrix monitore vos serveurs — CPU, RAM, Disque, réseau — et vous
-          alerte avant que vos clients ne remarquent le problème. Conçu pour
-          les équipes tech en Afrique et à l&apos;international.
+          Veltrix monitore vos serveurs — CPU, RAM, Disque, r&eacute;seau — et vous
+          alerte avant que vos clients ne remarquent le probl&egrave;me. Con&ccedil;u pour
+          les &eacute;quipes tech en Afrique et &agrave; l&apos;international.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href="/register"
             className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors text-sm"
           >
-            Démarrer gratuitement
+            D&eacute;marrer gratuitement
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
             href="#features"
             className="inline-flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-200 px-6 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors text-sm"
           >
-            Voir les fonctionnalités
+            Voir les fonctionnalit&eacute;s
           </Link>
         </div>
         <p className="mt-6 text-xs text-gray-400">
-          Déployé sur des infrastructures Linux · Compatible Ubuntu, Debian, CentOS
+          D&eacute;ploy&eacute; sur des infrastructures Linux · Compatible Ubuntu, Debian, CentOS
         </p>
       </div>
     </section>
@@ -415,7 +415,7 @@ function Footer() {
               <Activity className="h-3 w-3 text-white" />
             </div>
             <span className="font-bold text-gray-900 text-sm">Veltrix</span>
-            <span className="text-gray-400 text-sm">\u2014 Infrastructure Monitoring</span>
+            <span className="text-gray-400 text-sm">— Infrastructure Monitoring</span>
           </div>
           <div className="flex gap-6 text-sm text-gray-500">
             <Link href="/register" className="hover:text-gray-900">S&apos;inscrire</Link>
@@ -424,11 +424,11 @@ function Footer() {
             <a href="mailto:contact@veltrix.io" className="hover:text-gray-900">Contact</a>
           </div>
           <p className="text-xs text-gray-400">
-            &copy; 2026 Veltrix \u00b7 Made in Togo
+            &copy; 2026 Veltrix · Made in Togo
           </p>
         </div>
       </div>
-    </section>
+    </footer>
   );
 }
 
