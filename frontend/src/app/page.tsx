@@ -160,33 +160,33 @@ function Features() {
   const features = [
     {
       icon: Activity,
-      title: "Monitoring temps r\u00e9el",
-      desc: "CPU, RAM, Disque, r\u00e9seau \u2014 donn\u00e9es fra\u00eeches toutes les 30 secondes. Graphes historiques sur 1h, 24h, 7 jours.",
+      title: "Monitoring temps réel",
+      desc: "CPU, RAM, Disque, réseau — données fraîches toutes les 30 secondes. Graphes historiques sur 1h, 24h, 7 jours.",
     },
     {
       icon: Bell,
       title: "Alertes automatiques",
-      desc: "Seuils configurables. Alerte imm\u00e9diate quand CPU d\u00e9passe 85% ou qu\u2019un serveur devient inaccessible.",
+      desc: "Seuils configurables. Alerte immédiate quand CPU dépasse 85% ou qu’un serveur devient inaccessible.",
     },
     {
       icon: Server,
-      title: "Agent ultra-l\u00e9ger",
-      desc: "Binaire Go de 7MB. S\u2019installe en une commande. Fonctionne m\u00eame sur les connexions instables gr\u00e2ce au buffer local.",
+      title: "Agent ultra-léger",
+      desc: "Binaire Go de 7MB. S’installe en une commande. Fonctionne même sur les connexions instables grâce au buffer local.",
     },
     {
       icon: BarChart3,
       title: "Historique 90 jours",
-      desc: "Conservez 3 mois de m\u00e9triques. Identifiez les tendances et anticipez les probl\u00e8mes de capacit\u00e9.",
+      desc: "Conservez 3 mois de métriques. Identifiez les tendances et anticipez les problèmes de capacité.",
     },
     {
       icon: Globe,
-      title: "Con\u00e7u pour l\u2019Afrique",
-      desc: "Paiement Mobile Money (T-Money, Moov). Interface en fran\u00e7ais. Optimis\u00e9 pour les connexions lentes.",
+      title: "Conçu pour l’Afrique",
+      desc: "Paiement Mobile Money (T-Money, Moov). Interface en français. Optimisé pour les connexions lentes.",
     },
     {
       icon: Shield,
-      title: "S\u00e9curis\u00e9 par design",
-      desc: "Isolation multi-tenant stricte. Chaque organisation ne voit que ses donn\u00e9es. HTTPS, JWT, cl\u00e9s API uniques.",
+      title: "Sécurisé par design",
+      desc: "Isolation multi-tenant stricte. Chaque organisation ne voit que ses données. HTTPS, JWT, clés API uniques.",
     },
   ];
 
@@ -197,7 +197,7 @@ function Features() {
           <h2 className="text-3xl font-bold text-gray-900">Tout ce dont vous avez besoin</h2>
           <p className="text-gray-500 mt-3 max-w-xl mx-auto">
             Veltrix couvre tous les aspects du monitoring d&apos;infrastructure
-            sans la complexit\u00e9 des outils enterprise.
+            sans la complexité des outils enterprise.
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -223,18 +223,18 @@ function HowItWorks() {
   const steps = [
     {
       step: "01",
-      title: "Cr\u00e9ez votre compte",
-      desc: "Inscription en 30 secondes. Aucune carte de cr\u00e9dit requise pour l\u2019essai gratuit de 30 jours.",
+      title: "Créez votre compte",
+      desc: "Inscription en 30 secondes. Aucune carte de crédit requise pour l’essai gratuit de 30 jours.",
     },
     {
       step: "02",
-      title: "Installez l\u2019agent",
-      desc: "Une commande sur votre serveur. L\u2019agent Go d\u00e9marre et envoie les premi\u00e8res m\u00e9triques en moins d\u2019une minute.",
+      title: "Installez l’agent",
+      desc: "Une commande sur votre serveur. L’agent Go démarre et envoie les premières métriques en moins d’une minute.",
     },
     {
       step: "03",
       title: "Surveillez et alertez",
-      desc: "Configurez vos seuils d\u2019alerte. Recevez des notifications quand quelque chose ne va pas.",
+      desc: "Configurez vos seuils d’alerte. Recevez des notifications quand quelque chose ne va pas.",
     },
   ];
 
@@ -242,7 +242,7 @@ function HowItWorks() {
     <section className="py-20 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900">Op\u00e9rationnel en 5 minutes</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Opérationnel en 5 minutes</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {steps.map(({ step, title, desc }) => (
@@ -267,13 +267,13 @@ function Pricing() {
       price: "0",
       currency: "XOF",
       period: "/ mois",
-      desc: "Pour d\u00e9couvrir Veltrix",
+      desc: "Pour découvrir Veltrix",
       features: [
         "3 agents maximum",
-        "30 jours de r\u00e9tention",
+        "30 jours de rétention",
         "Alertes email",
-        "Dashboard temps r\u00e9el",
-        "Support communaut\u00e9",
+        "Dashboard temps réel",
+        "Support communauté",
       ],
       cta: "Commencer gratuitement",
       href: "/register",
@@ -284,10 +284,10 @@ function Pricing() {
       price: "10 000",
       currency: "XOF",
       period: "/ mois",
-      desc: "Pour les petites \u00e9quipes",
+      desc: "Pour les petites équipes",
       features: [
         "10 agents",
-        "90 jours de r\u00e9tention",
+        "90 jours de rétention",
         "Alertes SMS + Email",
         "Graphes historiques",
         "Support email prioritaire",
@@ -301,15 +301,15 @@ function Pricing() {
       price: "25 000",
       currency: "XOF",
       period: "/ mois",
-      desc: "Pour les \u00e9quipes DevOps",
+      desc: "Pour les équipes DevOps",
       features: [
         "50 agents",
-        "1 an de r\u00e9tention",
+        "1 an de rétention",
         "Alertes SMS + WhatsApp + Email",
-        "API compl\u00e8te",
-        "Support d\u00e9di\u00e9",
+        "API complète",
+        "Support dédié",
       ],
-      cta: "Contacter l\u2019\u00e9quipe",
+      cta: "Contacter l’équipe",
       href: "mailto:contact@veltrix.io",
       highlight: false,
     },
@@ -323,7 +323,7 @@ function Pricing() {
           <p className="text-gray-500 mt-3">
             Paiement par Mobile Money (T-Money, Moov) ou carte bancaire.
             <br />
-            Pas de surprise, pas d\u2019engagement.
+            Pas de surprise, pas d’engagement.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -367,7 +367,7 @@ function Pricing() {
           ))}
         </div>
         <p className="text-center text-xs text-gray-400 mt-6">
-          Paiement s\u00e9curis\u00e9 \u00b7 Annulation \u00e0 tout moment \u00b7 Donn\u00e9es h\u00e9berg\u00e9es en Afrique de l&apos;Ouest
+          Paiement sécurisé · Annulation à tout moment · Données hébergées en Afrique de l&apos;Ouest
         </p>
       </div>
     </section>
@@ -379,18 +379,18 @@ function CTA() {
     <section className="py-20 px-4">
       <div className="max-w-3xl mx-auto text-center">
         <h2 className="text-3xl font-bold text-gray-900">
-          Commencez \u00e0 surveiller votre infrastructure aujourd&apos;hui
+          Commencez à surveiller votre infrastructure aujourd&apos;hui
         </h2>
         <p className="text-gray-500 mt-3 mb-8">
-          Rejoignez les \u00e9quipes tech qui font confiance \u00e0 Veltrix pour garder
-          leurs serveurs en bonne sant\u00e9.
+          Rejoignez les équipes tech qui font confiance à Veltrix pour garder
+          leurs serveurs en bonne santé.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href="/register"
             className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors"
           >
-            Cr\u00e9er un compte gratuit
+            Créer un compte gratuit
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
