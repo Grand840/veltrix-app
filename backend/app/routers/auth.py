@@ -94,3 +94,32 @@ def logout(current_user: User = Depends(get_current_user)):
         message="Deconnexion reussie",
         success=True
     )
+
+
+@router.post(
+    "/test-email",
+    tags=["Debug"],
+    summary="Tester l'envoi d'email (dev uniquement)",
+)
+def test_email(
+    current_user=Depends(get_current_user),
+    db=Depends(get_db),
+):
+    """Envoie un email de bienvenue test a l'utilisateur connecte."""
+    from app.config import settings
+    if settings.app_env == "production":
+        from fastapi import HTTPException
+        raise HTTPException(403, "Non disponible en production")
+
+    from app.services.email import send_welcome_email
+    from app.models.organization import Organization
+    org = db.query(Organization).filter(
+        Organization.id == current_user.organization_id
+    ).first()
+
+    result = send_welcome_email(
+        to_email=current_user.email,
+        full_name=current_user.full_name,
+        organization_name=org.name if org else "Test Org",
+    )
+    return {"sent": result, "to": current_user.email}

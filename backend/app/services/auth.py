@@ -11,6 +11,7 @@ from app.config import settings
 from app.models.organization import Organization, PlanType
 from app.models.user import User, UserRole
 from app.schemas.auth import RegisterRequest, LoginRequest
+from app.services.email import send_welcome_email
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -108,6 +109,12 @@ def register_user(data: RegisterRequest, db: Session) -> tuple[User, str, int]:
     db.commit()
     db.refresh(user)
     db.refresh(org)
+
+    try:
+        send_welcome_email(to_email=user.email, full_name=user.full_name,
+                          organization_name=org.name)
+    except Exception:
+        pass
 
     token, expires_in = create_access_token(str(user.id), str(org.id))
     return user, token, expires_in

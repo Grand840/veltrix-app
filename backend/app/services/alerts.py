@@ -6,6 +6,7 @@ from sqlalchemy import func
 
 from app.models.alert import Alert, AlertSeverity, AlertStatus, AlertMetric
 from app.models.agent import Agent
+from app.services import email as email_service
 
 
 THRESHOLDS = {
@@ -117,6 +118,32 @@ def check_and_create_alerts(
     else:
         auto_resolve_alert(agent.id, AlertMetric.DISK_USAGE, db)
 
+    for alert in new_alerts:
+        try:
+            from app.models.user import User, UserRole
+            owner = db.query(User).filter(
+                User.organization_id == agent.organization_id,
+                User.role == UserRole.OWNER,
+                User.is_active == True,
+            ).first()
+            if owner and alert.metric.value != "agent_down":
+                metric_labels = {
+                    "cpu_usage": "CPU",
+                    "memory_usage": "RAM",
+                    "disk_usage": "Disque",
+                }
+                email_service.send_metric_alert(
+                    to_email=owner.email,
+                    full_name=owner.full_name,
+                    agent_name=agent.name,
+                    metric_label=metric_labels.get(alert.metric.value, alert.metric.value),
+                    current_value=alert.current_value or 0,
+                    threshold_value=alert.threshold_value or 0,
+                    severity=alert.severity.value,
+                )
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Erreur email alerte: {e}")
     return new_alerts
 
 

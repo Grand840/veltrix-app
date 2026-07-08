@@ -56,6 +56,12 @@ class Settings(BaseSettings):
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
         )
 
+
+    # Email Resend
+    resend_api_key: str = ""
+    from_email: str = "onboarding@resend.dev"
+    from_name: str = "Veltrix"
+
     class Config:
         env_file = ".env"
         case_sensitive = False

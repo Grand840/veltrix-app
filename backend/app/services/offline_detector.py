@@ -6,8 +6,10 @@ from sqlalchemy.orm import Session
 
 from app.database import SessionLocal
 from app.models.agent import Agent, AgentStatus
-from app.services.alerts import create_agent_down_alert, auto_resolve_alert
+from app.models.user import User, UserRole
 from app.models.alert import AlertMetric
+from app.services.alerts import create_agent_down_alert, auto_resolve_alert
+from app.services.email import send_agent_down_alert
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +42,24 @@ def check_offline_agents(db: Session) -> dict:
         alert = create_agent_down_alert(agent, db)
         if alert:
             result["alerts_created"] += 1
-            logger.warning(f"Agent offline detecte: {agent.name} (last_seen: {agent.last_seen_at})")
+            logger.warning("Agent offline detecte: " + agent.name + " (last_seen: " + str(agent.last_seen_at) + ")")
+            try:
+                owner = db.query(User).filter(
+                    User.organization_id == agent.organization_id,
+                    User.role == UserRole.OWNER,
+                    User.is_active == True,
+                ).first()
+                if owner:
+                    last_seen_str = f"il y a plus de {OFFLINE_THRESHOLD_SECONDS // 60} minutes"
+                    send_agent_down_alert(
+                        to_email=owner.email,
+                        full_name=owner.full_name,
+                        agent_name=agent.name,
+                        hostname=agent.hostname,
+                        last_seen_ago=last_seen_str,
+                    )
+            except Exception as e:
+                logger.error(f"Erreur envoi email alerte: {e}")
 
     agents_back_online = db.query(Agent).filter(
         Agent.status == AgentStatus.ONLINE,

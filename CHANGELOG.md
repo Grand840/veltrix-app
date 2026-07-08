@@ -248,3 +248,33 @@
 - 3-step HowItWorks
 - Section pricing (3 plans: Gratuit/Starter/Pro en XOF)
 - Footer avec liens et Made in Togo
+
+## [0.2.2] - Jour 22 - Emails avec Resend
+
+### Ajouté
+-  : service email complet avec 4 templates HTML
+  -  : bienvenue à l'inscription
+  -  : agent hors ligne
+  -  : seuil CPU/RAM/Disk dépassé
+  -  : rapport quotidien (base)
+- Intégration dans  : email bienvenue à l'inscription
+- Intégration dans  : email alerte agent offline
+- Intégration dans  : email alerte métrique
+- Template HTML responsive compatible email clients
+- Gestion silencieuse des erreurs (email ne bloque jamais l'API)
+-  : RESEND_API_KEY, FROM_EMAIL, FROM_NAME
+- Endpoint POST /api/v1/auth/test-email (dev uniquement)
+
+
+## [0.2.2] - Jour 22 - Emails avec Resend
+
+### Ajoute
+- services/email.py : service email complet avec 4 templates HTML
+- send_welcome_email, send_agent_down_alert, send_metric_alert, send_daily_report
+- Integration dans services/auth.py : email bienvenue a l inscription
+- Integration dans services/offline_detector.py : email alerte agent offline
+- Integration dans services/alerts.py : email alerte metrique
+- Template HTML responsive compatible email clients
+- Gestion silencieuse des erreurs (email ne bloque jamais l API)
+- config.py : RESEND_API_KEY, FROM_EMAIL, FROM_NAME
+- Endpoint POST /api/v1/auth/test-email (dev uniquement)
