@@ -1,3 +1,6 @@
+"use client";
+
+import { motion } from "framer-motion";
 import Link from "next/link";
 import {
   Activity,
@@ -10,6 +13,21 @@ import {
   ArrowRight,
   Globe,
 } from "lucide-react";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+};
+
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } },
+};
+
+const cardUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
 
 function NavBar() {
   return (
@@ -43,7 +61,13 @@ function NavBar() {
 function Hero() {
   return (
     <section className="pt-32 pb-20 px-4">
-      <div className="max-w-4xl mx-auto text-center">
+      <motion.div
+        className="max-w-4xl mx-auto text-center"
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+      >
         <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-medium px-3 py-1.5 rounded-full mb-6">
           <Zap className="h-3 w-3" />
           30 jours d&apos;essai gratuit — aucune carte requise
@@ -77,7 +101,7 @@ function Hero() {
         <p className="mt-6 text-xs text-gray-400">
           D&eacute;ploy&eacute; sur des infrastructures Linux · Compatible Ubuntu, Debian, CentOS
         </p>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -85,7 +109,13 @@ function Hero() {
 function DashboardPreview() {
   return (
     <section className="px-4 pb-20">
-      <div className="max-w-5xl mx-auto">
+      <motion.div
+        className="max-w-5xl mx-auto"
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+      >
         <div className="bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden">
           <div className="bg-gray-100 px-4 py-2.5 flex items-center gap-2 border-b border-gray-200">
             <div className="w-3 h-3 rounded-full bg-red-400" />
@@ -151,7 +181,7 @@ function DashboardPreview() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -200,10 +230,17 @@ function Features() {
             sans la complexité des outils enterprise.
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          variants={stagger}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+        >
           {features.map(({ icon: Icon, title, desc }) => (
-            <div
+            <motion.div
               key={title}
+              variants={cardUp}
               className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-md transition-shadow"
             >
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
@@ -211,9 +248,9 @@ function Features() {
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">{title}</h3>
               <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -244,17 +281,23 @@ function HowItWorks() {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900">Opérationnel en 5 minutes</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          variants={stagger}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+        >
           {steps.map(({ step, title, desc }) => (
-            <div key={step} className="text-center">
+            <motion.div key={step} variants={cardUp} className="text-center">
               <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">
                 {step}
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">{title}</h3>
               <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -326,10 +369,17 @@ function Pricing() {
             Pas de surprise, pas d’engagement.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          variants={stagger}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+        >
           {plans.map(({ name, price, currency, period, desc, features, cta, href, highlight }) => (
-            <div
+            <motion.div
               key={name}
+              variants={cardUp}
               className={`bg-white rounded-2xl p-6 border-2 transition-shadow hover:shadow-lg ${
                 highlight ? "border-blue-500 shadow-md" : "border-gray-200"
               }`}
@@ -363,9 +413,9 @@ function Pricing() {
               >
                 {cta}
               </Link>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
         <p className="text-center text-xs text-gray-400 mt-6">
           Paiement sécurisé · Annulation à tout moment · Données hébergées en Afrique de l&apos;Ouest
         </p>
@@ -377,7 +427,13 @@ function Pricing() {
 function CTA() {
   return (
     <section className="py-20 px-4">
-      <div className="max-w-3xl mx-auto text-center">
+      <motion.div
+        className="max-w-3xl mx-auto text-center"
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+      >
         <h2 className="text-3xl font-bold text-gray-900">
           Commencez à surveiller votre infrastructure aujourd&apos;hui
         </h2>
@@ -400,7 +456,7 @@ function CTA() {
             Se connecter
           </Link>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -408,7 +464,13 @@ function CTA() {
 function Footer() {
   return (
     <footer className="border-t border-gray-200 py-10 px-4">
-      <div className="max-w-6xl mx-auto">
+      <motion.div
+        className="max-w-6xl mx-auto"
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+      >
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
@@ -427,7 +489,7 @@ function Footer() {
             &copy; 2026 Veltrix · Made in Togo
           </p>
         </div>
-      </div>
+      </motion.div>
     </footer>
   );
 }
