@@ -2,7 +2,7 @@
 Organization — Le compte client racine.
 Tout dans Veltrix appartient à une Organization.
 """
-from sqlalchemy import Column, String, Boolean, Integer, Enum
+from sqlalchemy import Column, String, Boolean, Integer, Enum, DateTime
 from sqlalchemy.orm import relationship
 import enum
 from app.models.base import BaseModel
@@ -49,6 +49,12 @@ class Organization(BaseModel):
         default=3,  # Free tier : 3 agents max
         nullable=False,
         comment="Nombre maximum d'agents autorisés"
+    )
+
+    trial_ends_at = Column(
+        DateTime,
+        nullable=True,
+        comment="Date de fin de la periode d essai gratuit (null = pas de trial)"
     )
 
     is_active = Column(

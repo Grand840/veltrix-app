@@ -114,3 +114,33 @@ export interface ApiError {
   detail: string | null;
   status_code: number;
 }
+
+
+// ─── Billing ─────────────────────────────────────────────────────────────────
+
+export interface BillingStatus {
+  plan: string;
+  plan_label: string;
+  is_trial: boolean;
+  trial_ends_at: string | null;
+  trial_days_remaining: number | null;
+  trial_expired: boolean;
+  max_agents: number;
+  agents_used: number;
+  agents_remaining: number;
+  show_upgrade_banner: boolean;
+  upgrade_urgency: "none" | "warning" | "critical";
+  upgrade_message: string | null;
+}
+
+export interface PlanInfo {
+  name: string;
+  label: string;
+  price_xof: number;
+  price_eur: number;
+  max_agents: number;
+  retention_days: number;
+  features: string[];
+  is_current: boolean;
+  is_popular: boolean;
+}

@@ -15,6 +15,7 @@ from app.routers import agents as agents_router
 from app.routers import metrics as metrics_router
 from app.routers import organization as org_router
 from app.routers import alerts as alerts_router
+from app.routers import billing as billing_router
 from app.schemas.errors import VeltrixError, ErrorResponse
 from app.services.offline_detector import offline_detector_loop
 
@@ -77,7 +78,7 @@ async def veltrix_exception_handler(request: Request, exc: VeltrixError):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://10.0.40.20:3000", "https://veltrix.ddns.net"],
+    allow_origins=["http://localhost","http://localhost:3000", "http://10.0.40.20:3000", "https://veltrix.ddns.net"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -88,6 +89,7 @@ app.include_router(agents_router.router,  prefix=settings.api_prefix)
 app.include_router(metrics_router.router, prefix=settings.api_prefix)
 app.include_router(org_router.router,     prefix=settings.api_prefix)
 app.include_router(alerts_router.router,  prefix=settings.api_prefix)
+app.include_router(billing_router.router, prefix=settings.api_prefix)
 
 
 @app.get("/health", tags=["System"])

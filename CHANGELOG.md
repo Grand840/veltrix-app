@@ -278,3 +278,26 @@
 - Gestion silencieuse des erreurs (email ne bloque jamais l API)
 - config.py : RESEND_API_KEY, FROM_EMAIL, FROM_NAME
 - Endpoint POST /api/v1/auth/test-email (dev uniquement)
+
+## [0.2.0] - Jour 24 - Billing + Trial 30 jours
+
+### Ajoute
+- BDD : champ \`trial_ends_at\` sur \`organizations\` (migration Alembic)
+- \`services/billing.py\` : get_billing_status (jours restants, urgence, messages)
+- \`schemas/billing.py\` : BillingStatus, PlanInfo
+- \`routers/billing.py\` : GET /billing/status, GET /billing/plans
+- \`hooks/useBilling.ts\` : SWR billing status + plans (refresh 60s)
+- \`components/billing/TrialBanner.tsx\` : banniere rouge/ambre si < 7 jours
+- \`app/(dashboard)/billing/page.tsx\` : page complete (statut, barre progression, plans)
+- Sidebar : lien "Abonnement" avec icone CreditCard
+- register_user : trial_ends_at = now + 30 jours a l inscription
+
+### Logique trial
+- < 7 jours -> banniere warning (ambre)
+- < 3 jours -> banniere critical (rouge)
+- Expire -> message upgrade obligatoire
+- Limite agents atteinte -> suggestion upgrade
+
+### E2E
+- 37/37 passes (2.3 min)
+- Fix auth.spec.ts Essai gratuit: use \`click()\` instead of \`page.evaluate\`

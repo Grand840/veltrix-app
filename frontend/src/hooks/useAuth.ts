@@ -23,6 +23,7 @@ export function useAuth() {
       setAuth(access_token, userResp.data);
       router.push("/dashboard");
       router.refresh();
+      
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -48,6 +49,7 @@ export function useAuth() {
       setAuth(access_token, userResp.data);
       router.push("/dashboard");
       router.refresh();
+      
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {

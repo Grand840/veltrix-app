@@ -22,9 +22,12 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401 && typeof window !== "undefined") {
-      localStorage.removeItem("veltrix_token");
-      localStorage.removeItem("veltrix_user");
-      window.location.href = "/login";
+      const url = error.config?.url || "";
+      if (!url.includes("/auth/login") && !url.includes("/auth/register")) {
+        localStorage.removeItem("veltrix_token");
+        localStorage.removeItem("veltrix_user");
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }
@@ -74,3 +77,12 @@ export function getErrorMessage(error: unknown): string {
   }
   return "Une erreur inattendue est survenue";
 }
+
+// ─── Billing ─────────────────────────────────────────────────────────────────
+
+import type { BillingStatus, PlanInfo } from "@/types";
+
+export const billingApi = {
+  status: () => apiClient.get<BillingStatus>("/billing/status"),
+  plans:  () => apiClient.get<PlanInfo[]>("/billing/plans"),
+};

@@ -91,6 +91,7 @@ def register_user(data: RegisterRequest, db: Session) -> tuple[User, str, int]:
         plan=PlanType.FREE,
         max_agents=3,
         is_active=True,
+        trial_ends_at=datetime.utcnow() + timedelta(days=30),
     )
     db.add(org)
     db.flush()

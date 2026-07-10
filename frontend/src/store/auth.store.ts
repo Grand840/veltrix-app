@@ -6,6 +6,7 @@ interface AuthState {
   token: string | null;
   user: UserResponse | null;
   isAuthenticated: boolean;
+  hydrated: boolean;
   setAuth: (token: string, user: UserResponse) => void;
   clearAuth: () => void;
   updateUser: (user: Partial<UserResponse>) => void;
@@ -17,9 +18,10 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       user: null,
       isAuthenticated: false,
+      hydrated: false,
       setAuth: (token, user) => {
         localStorage.setItem("veltrix_token", token);
-        set({ token, user, isAuthenticated: true });
+        set({ token, user, isAuthenticated: true, hydrated: true });
       },
       clearAuth: () => {
         localStorage.removeItem("veltrix_token");
@@ -32,6 +34,9 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "veltrix-auth",
       partialize: (state) => ({ token: state.token, user: state.user, isAuthenticated: state.isAuthenticated }),
+      onRehydrateStorage: () => (state) => {
+        if (state) state.hydrated = true;
+      },
     }
   )
 );

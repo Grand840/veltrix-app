@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Server, Bell, Settings, LogOut, Activity } from "lucide-react";
+import { LayoutDashboard, Server, Bell, Settings, LogOut, Activity, CreditCard } from "lucide-react";
+import { TrialBanner } from "@/components/billing/TrialBanner";
 import { useAuthStore } from "@/store/auth.store";
 import { useAuth } from "@/hooks/useAuth";
 import { useAlerts } from "@/hooks/useAlerts";
@@ -22,11 +23,11 @@ function AlertsBadge() {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, hydrated } = useAuthStore();
   const { logout } = useAuth();
 
-  useEffect(() => { if (!isAuthenticated) router.push("/login"); }, [isAuthenticated, router]);
-  if (!isAuthenticated) return null;
+  useEffect(() => { if (hydrated && !isAuthenticated) router.push("/login"); }, [hydrated, isAuthenticated, router]);
+  if (!hydrated) return null;
 
   const NAV_ITEMS = [
     { href: "/dashboard", label: "Vue d'ensemble", icon: LayoutDashboard, badge: null },
@@ -82,7 +83,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
         </div>
       </aside>
-      <main className="flex-1 overflow-auto"><div className="p-8">{children}</div></main>
+      <main className="flex-1 overflow-auto flex flex-col">
+        <TrialBanner />
+        <div className="p-8 flex-1">{children}</div>
+      </main>
     </div>
   );
 }
