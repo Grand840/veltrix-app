@@ -46,6 +46,9 @@ function NavBar() {
           <a href="#pricing" className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
             Tarifs
           </a>
+          <a href="/beta" className="text-sm text-gray-600 hover:text-blue-600 transition-colors">
+            Programme Beta
+          </a>
         </div>
 
         <div className="hidden md:flex items-center gap-3">
@@ -74,6 +77,7 @@ function NavBar() {
             { href: "#features", label: "Fonctionnalites" },
             { href: "#how", label: "Comment ca marche" },
             { href: "#pricing", label: "Tarifs" },
+          { href: "/beta", label: "Programme Beta" },
           ].map(({ href, label }) => (
             <a key={href} href={href} className="block text-sm text-gray-600 hover:text-blue-600 py-1" onClick={() => setMenuOpen(false)}>
               {label}
@@ -477,7 +481,8 @@ function Footer() {
             <Link href="/register" className="hover:text-blue-600 transition-colors">S&apos;inscrire</Link>
             <Link href="/login"    className="hover:text-blue-600 transition-colors">Connexion</Link>
             <a href="#pricing"     className="hover:text-blue-600 transition-colors">Tarifs</a>
-            <a href="mailto:contact@veltrix.io" className="hover:text-blue-600 transition-colors">Contact</a>
+            <a href="/beta" className="hover:text-blue-600 transition-colors">Programme Beta</a>
+                        <a href="mailto:contact@veltrix.io" className="hover:text-blue-600 transition-colors">Contact</a>
           </div>
 
           <p className="text-xs text-gray-400">

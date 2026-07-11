@@ -39,23 +39,20 @@ func runCycle(log *logger.Logger, snd *sender.Sender) {
 }
 
 func main() {
-	apiURL := os.Getenv("VELTRIX_API_URL")
-	if apiURL == "" {
-		apiURL = "http://localhost:8000"
-	}
-	apiKey := os.Getenv("VELTRIX_API_KEY")
-	if apiKey == "" {
-		apiKey = "dev-key"
+	cfg, err := LoadConfig()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Erreur: %v\n", err)
+		os.Exit(1)
 	}
 
 	log := logger.New(logger.INFO)
-	snd := sender.New(apiURL, apiKey)
+	snd := sender.New(cfg.APIURL, cfg.APIKey)
 
 	log.Info("agent starting",
-		logger.F("api_url", apiURL, "interval", "15s"),
+		logger.F("api_url", cfg.APIURL, "interval", fmt.Sprintf("%.0fs", cfg.Interval.Seconds())),
 	)
 
-	ticker := time.NewTicker(15 * time.Second)
+	ticker := time.NewTicker(cfg.Interval)
 	defer ticker.Stop()
 
 	sigCh := make(chan os.Signal, 1)

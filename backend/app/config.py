@@ -57,6 +57,9 @@ class Settings(BaseSettings):
         )
 
 
+    # URL de base (générée depuis le navigateur, pour les commandes d'install)
+    veltrix_base_url: str = "http://localhost:8000"
+
     # Email Resend
     resend_api_key: str = ""
     from_email: str = "onboarding@resend.dev"

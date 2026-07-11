@@ -16,6 +16,7 @@ from app.routers import metrics as metrics_router
 from app.routers import organization as org_router
 from app.routers import alerts as alerts_router
 from app.routers import billing as billing_router
+from app.routers import beta as beta_router
 from app.schemas.errors import VeltrixError, ErrorResponse
 from app.services.offline_detector import offline_detector_loop
 
@@ -90,6 +91,7 @@ app.include_router(metrics_router.router, prefix=settings.api_prefix)
 app.include_router(org_router.router,     prefix=settings.api_prefix)
 app.include_router(alerts_router.router,  prefix=settings.api_prefix)
 app.include_router(billing_router.router, prefix=settings.api_prefix)
+app.include_router(beta_router.router, prefix=settings.api_prefix)
 
 
 @app.get("/health", tags=["System"])

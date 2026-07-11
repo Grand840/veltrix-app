@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
+from app.config import settings
 from app.middleware.auth import get_current_user, get_current_org
 from app.models.user import User
 from app.models.organization import Organization
@@ -42,10 +43,10 @@ def create(
     except ValueError as e:
         raise BadRequestError(str(e), error="AGENT_LIMIT_REACHED")
 
+    base_url = settings.veltrix_base_url
     install_cmd = (
-        f"VELTRIX_KEY={api_key} "
-        f"VELTRIX_URL=http://localhost:8000 "
-        f"./agent/veltrix-agent"
+        f"curl -fsSL {base_url}/downloads/install.sh | "
+        f"sudo VELTRIX_KEY={api_key} bash"
     )
 
     return AgentInstallCommand(
